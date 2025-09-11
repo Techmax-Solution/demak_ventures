@@ -72,12 +72,36 @@ export const getProducts = async (filters = {}) => {
   try {
     const params = new URLSearchParams();
     
-    if (filters.category) params.append('category', filters.category);
-    if (filters.priceRange) {
-      const [min, max] = filters.priceRange.split('-');
-      if (min) params.append('minPrice', min);
-      if (max && max !== '+') params.append('maxPrice', max);
+    // Handle multiple categories (empty array means show all categories)
+    if (filters.categories && filters.categories.length > 0) {
+      filters.categories.forEach(category => {
+        params.append('category', category);
+      });
     }
+    // If categories array is empty, don't add any category filter (shows all products)
+    
+    // Handle price range
+    if (filters.priceRange && Array.isArray(filters.priceRange)) {
+      const [min, max] = filters.priceRange;
+      if (min) params.append('minPrice', min.toString());
+      if (max) params.append('maxPrice', max.toString());
+    }
+    
+    // Handle colors
+    if (filters.colors && filters.colors.length > 0) {
+      filters.colors.forEach(color => {
+        params.append('color', color);
+      });
+    }
+    
+    // Handle sizes
+    if (filters.sizes && filters.sizes.length > 0) {
+      filters.sizes.forEach(size => {
+        params.append('size', size);
+      });
+    }
+    
+    // Handle sorting
     if (filters.sortBy) {
       switch (filters.sortBy) {
         case 'price-low':

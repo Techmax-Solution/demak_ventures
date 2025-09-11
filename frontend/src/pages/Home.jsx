@@ -1,5 +1,13 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
+import TrendingProducts from '../components/TrendingProducts';
+import SignatureSection from '../components/SignatureSection';
+import NewArrivals from '../components/NewArrivals';
+import Newsletter from '../components/Newsletter';
+import CollectionCards from '../components/CollectionCards';
+import Testimonial from '../components/Testimonial';
+import FeaturedBrands from '../components/FeaturedBrands';
+import ShopByCategory from '../components/ShopByCategory';
 
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -161,55 +169,32 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">Why Choose Us?</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-6">
-              <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Premium Quality</h3>
-              <p className="text-gray-600">High-quality materials and craftsmanship in every piece</p>
-            </div>
-            <div className="text-center p-6">
-              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Fast Shipping</h3>
-              <p className="text-gray-600">Quick and reliable delivery to your doorstep</p>
-            </div>
-            <div className="text-center p-6">
-              <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Customer Satisfaction</h3>
-              <p className="text-gray-600">30-day return policy and excellent customer service</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Trending Products Section */}
+      <TrendingProducts />
 
-      {/* CTA Section */}
-      <section className="bg-gray-100 py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4 text-gray-800">Ready to Update Your Wardrobe?</h2>
-          <p className="text-lg text-gray-600 mb-8">Join thousands of satisfied customers</p>
-          <Link 
-            to="/shop" 
-            className="btn-primary text-lg px-8 py-3 inline-block"
-          >
-            Browse Collection
-          </Link>
-        </div>
-      </section>
+     
+      {/* Shop By Category Section */}
+      <ShopByCategory />
+
+          {/* Featured Brands Section */}
+          <FeaturedBrands />
+
+
+      {/* New Arrivals Section */}
+      <NewArrivals />
+
+      {/* Newsletter Section */}
+      <Newsletter />
+
+      {/* Collection Cards Section */}
+      <CollectionCards />
+
+      {/* Testimonial Section */}
+      <Testimonial />
+
+  
+
+  
     </div>
   );
 };
