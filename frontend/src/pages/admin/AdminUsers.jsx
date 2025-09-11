@@ -286,7 +286,7 @@ const AdminUsers = () => {
                   </div>
                   <div className="bg-green-50 p-3 rounded-lg">
                     <div className="text-sm text-green-600 font-medium">Total Spent</div>
-                    <div className="text-2xl font-bold text-green-900">$0.00</div>
+                    <div className="text-2xl font-bold text-green-900">₵0.00</div>
                   </div>
                   <div className="bg-purple-50 p-3 rounded-lg">
                     <div className="text-sm text-purple-600 font-medium">Reviews</div>

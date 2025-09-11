@@ -76,11 +76,11 @@ const ProductCard = ({ product }) => {
           <div className="flex items-center space-x-2">
             {product.originalPrice && product.originalPrice > product.price ? (
               <>
-                <span className="text-lg font-bold text-blue-600">${product.price}</span>
-                <span className="text-sm text-gray-500 line-through">${product.originalPrice}</span>
+                <span className="text-lg font-bold text-blue-600">₵{product.price}</span>
+                <span className="text-sm text-gray-500 line-through">₵{product.originalPrice}</span>
               </>
             ) : (
-              <span className="text-lg font-bold text-gray-800">${product.price}</span>
+              <span className="text-lg font-bold text-gray-800">₵{product.price}</span>
             )}
           </div>
           

@@ -1,12 +1,20 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
-import { getProducts } from '../services/api';
+import { getProducts, getProductFilters } from '../services/api';
 
 const Shop = () => {
+  const navigate = useNavigate();
   const [allProducts, setAllProducts] = useState([]); // Store all products from API
   const [products, setProducts] = useState([]); // Filtered products for display
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [availableFilters, setAvailableFilters] = useState({
+    categories: [],
+    colors: [],
+    sizes: [],
+    priceRange: { minPrice: 40, maxPrice: 210 }
+  });
   const [filters, setFilters] = useState({
     categories: [], // Empty array means show all categories
     priceRange: [40, 210], // [min, max] for range slider
@@ -17,9 +25,10 @@ const Shop = () => {
   
   const [priceSliderValue, setPriceSliderValue] = useState([40, 210]);
 
-  // Fetch all products only once on component mount
+  // Fetch all products and filters on component mount
   useEffect(() => {
     fetchAllProducts();
+    fetchAvailableFilters();
   }, []);
 
   // Apply filters to products whenever filters change
@@ -58,6 +67,39 @@ const Shop = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAvailableFilters = async () => {
+    try {
+      console.log('Fetching available filters...');
+      const filterData = await getProductFilters();
+      console.log('Received filter data:', filterData);
+      
+      setAvailableFilters({
+        categories: filterData.categories || [],
+        colors: filterData.colors || [],
+        sizes: filterData.sizes || [],
+        priceRange: filterData.priceRange || { minPrice: 40, maxPrice: 210 }
+      });
+
+      // Update initial price range based on backend data
+      const { minPrice, maxPrice } = filterData.priceRange || { minPrice: 40, maxPrice: 210 };
+      setFilters(prev => ({
+        ...prev,
+        priceRange: [minPrice, maxPrice]
+      }));
+      setPriceSliderValue([minPrice, maxPrice]);
+      
+    } catch (err) {
+      console.error('Error fetching filters:', err);
+      // Use default values if filters fetch fails
+      setAvailableFilters({
+        categories: ['accessories', 'bag', 'men', 'shoes', 'tops', 'women'],
+        colors: ['beige', 'black', 'gray', 'yellow', 'pink', 'red'],
+        sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+        priceRange: { minPrice: 40, maxPrice: 210 }
+      });
     }
   };
 
@@ -161,12 +203,17 @@ const Shop = () => {
 
   const handlePriceRangeChange = (event) => {
     const value = parseInt(event.target.value);
-    const newRange = [40, value];
+    const minPrice = availableFilters.priceRange.minPrice || 40;
+    const newRange = [minPrice, value];
     setPriceSliderValue(newRange);
     setFilters(prev => ({
       ...prev,
       priceRange: newRange
     }));
+  };
+
+  const handleProductClick = (productId) => {
+    navigate(`/product/${productId}`);
   };
 
   if (loading) {
@@ -217,14 +264,24 @@ const Shop = () => {
           <div className="text-center">
             {/* Title with back arrow */}
             <h1 className="text-5xl lg:text-6xl font-light text-gray-900 mb-4 tracking-wide flex items-center justify-center">
-              <span className="mr-4">←</span>
+              <span 
+                className="mr-4 cursor-pointer hover:text-gray-700 transition-colors"
+                onClick={() => navigate(-1)}
+              >
+                ←
+              </span>
               Shop
             </h1>
             
             {/* Breadcrumb */}
             <nav>
               <div className="flex items-center justify-center space-x-2 text-sm text-gray-700 uppercase tracking-wide">
-                <span className="hover:text-gray-900 cursor-pointer">HOME</span>
+                <span 
+                  className="hover:text-gray-900 cursor-pointer transition-colors"
+                  onClick={() => navigate('/')}
+                >
+                  HOME
+                </span>
                 <span>/</span>
                 <span className="text-gray-900 font-small">SHOP</span>
               </div>
@@ -250,60 +307,25 @@ const Shop = () => {
                   />
                   <span className="ml-3 text-sm text-gray-700">All Categories</span>
                 </label>
-                <label className="flex items-center cursor-pointer">
+                {availableFilters.categories.map(category => {
+                  const categoryCount = allProducts.filter(product => 
+                    product.category?.toLowerCase() === category.toLowerCase()
+                  ).length;
+                  
+                  return (
+                    <label key={category} className="flex items-center cursor-pointer">
                   <input 
                     type="checkbox" 
                     className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black" 
-                    checked={filters.categories.includes('accessories')}
-                    onChange={(e) => handleCategoryChange('accessories', e.target.checked)}
+                        checked={filters.categories.includes(category.toLowerCase())}
+                        onChange={(e) => handleCategoryChange(category, e.target.checked)}
                   />
-                  <span className="ml-3 text-sm text-gray-700">Accessory (9)</span>
+                      <span className="ml-3 text-sm text-gray-700">
+                        {category.charAt(0).toUpperCase() + category.slice(1)} ({categoryCount})
+                      </span>
                 </label>
-                <label className="flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
-                    checked={filters.categories.includes('bag')}
-                    onChange={(e) => handleCategoryChange('bag', e.target.checked)}
-                  />
-                  <span className="ml-3 text-sm text-gray-700">Bag (4)</span>
-                </label>
-                <label className="flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
-                    checked={filters.categories.includes('men')}
-                    onChange={(e) => handleCategoryChange('men', e.target.checked)}
-                  />
-                  <span className="ml-3 text-sm text-gray-700">Men's (6)</span>
-                </label>
-                <label className="flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
-                    checked={filters.categories.includes('shoes')}
-                    onChange={(e) => handleCategoryChange('shoes', e.target.checked)}
-                  />
-                  <span className="ml-3 text-sm text-gray-700">Shoes (6)</span>
-                </label>
-                <label className="flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
-                    checked={filters.categories.includes('tops')}
-                    onChange={(e) => handleCategoryChange('tops', e.target.checked)}
-                  />
-                  <span className="ml-3 text-sm text-gray-700">Tops (4)</span>
-                </label>
-                <label className="flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
-                    checked={filters.categories.includes('women')}
-                    onChange={(e) => handleCategoryChange('women', e.target.checked)}
-                  />
-                  <span className="ml-3 text-sm text-gray-700">Women's (4)</span>
-                </label>
+                  );
+                })}
               </div>
             </div>
 
@@ -313,14 +335,14 @@ const Shop = () => {
               <div className="px-2">
                 <input 
                   type="range" 
-                  min="40" 
-                  max="210" 
+                  min={availableFilters.priceRange.minPrice || 40} 
+                  max={availableFilters.priceRange.maxPrice || 210} 
                   value={priceSliderValue[1]}
                   onChange={handlePriceRangeChange}
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                 />
                 <div className="flex justify-between text-sm text-gray-600 mt-2">
-                  <span>Range: $40.00 - ${priceSliderValue[1]}.00</span>
+                  <span>Range: ₵{availableFilters.priceRange.minPrice || 40}.00 - ₵{priceSliderValue[1]}.00</span>
                 </div>
               </div>
             </div>
@@ -329,42 +351,39 @@ const Shop = () => {
             <div className="mb-8">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Color</h3>
               <div className="flex flex-wrap gap-2">
-                <div 
-                  className={`w-8 h-8 rounded-full bg-yellow-100 border-2 cursor-pointer hover:border-gray-400 ${
-                    filters.colors.includes('beige') ? 'border-black ring-2 ring-black' : 'border-gray-200'
-                  }`}
-                  onClick={() => handleColorChange('beige')}
+                {availableFilters.colors.map(color => {
+                  const getColorClass = (colorName) => {
+                    const colorMap = {
+                      beige: 'bg-yellow-100',
+                      black: 'bg-black',
+                      gray: 'bg-gray-600',
+                      grey: 'bg-gray-600',
+                      yellow: 'bg-yellow-400',
+                      pink: 'bg-pink-200',
+                      red: 'bg-red-600',
+                      blue: 'bg-blue-500',
+                      green: 'bg-green-500',
+                      white: 'bg-white',
+                      brown: 'bg-amber-700',
+                      purple: 'bg-purple-500',
+                      orange: 'bg-orange-500'
+                    };
+                    return colorMap[colorName.toLowerCase()] || 'bg-gray-300';
+                  };
+
+                  return (
+                    <div 
+                      key={color}
+                      className={`w-8 h-8 rounded-full border-2 cursor-pointer hover:border-gray-400 ${getColorClass(color)} ${
+                        filters.colors.includes(color.toLowerCase()) 
+                          ? (color.toLowerCase() === 'black' ? 'border-white ring-2 ring-gray-400' : 'border-black ring-2 ring-black')
+                          : 'border-gray-200'
+                      }`}
+                      onClick={() => handleColorChange(color.toLowerCase())}
+                      title={color.charAt(0).toUpperCase() + color.slice(1)}
                 ></div>
-                <div 
-                  className={`w-8 h-8 rounded-full bg-black border-2 cursor-pointer hover:border-gray-400 ${
-                    filters.colors.includes('black') ? 'border-white ring-2 ring-gray-400' : 'border-gray-200'
-                  }`}
-                  onClick={() => handleColorChange('black')}
-                ></div>
-                <div 
-                  className={`w-8 h-8 rounded-full bg-gray-600 border-2 cursor-pointer hover:border-gray-400 ${
-                    filters.colors.includes('gray') ? 'border-black ring-2 ring-black' : 'border-gray-200'
-                  }`}
-                  onClick={() => handleColorChange('gray')}
-                ></div>
-                <div 
-                  className={`w-8 h-8 rounded-full bg-yellow-400 border-2 cursor-pointer hover:border-gray-400 ${
-                    filters.colors.includes('yellow') ? 'border-black ring-2 ring-black' : 'border-gray-200'
-                  }`}
-                  onClick={() => handleColorChange('yellow')}
-                ></div>
-                <div 
-                  className={`w-8 h-8 rounded-full bg-pink-200 border-2 cursor-pointer hover:border-gray-400 ${
-                    filters.colors.includes('pink') ? 'border-black ring-2 ring-black' : 'border-gray-200'
-                  }`}
-                  onClick={() => handleColorChange('pink')}
-                ></div>
-                <div 
-                  className={`w-8 h-8 rounded-full bg-red-600 border-2 cursor-pointer hover:border-gray-400 ${
-                    filters.colors.includes('red') ? 'border-black ring-2 ring-black' : 'border-gray-200'
-                  }`}
-                  onClick={() => handleColorChange('red')}
-                ></div>
+                  );
+                })}
               </div>
             </div>
 
@@ -372,7 +391,7 @@ const Shop = () => {
             <div className="mb-8">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Size</h3>
               <div className="grid grid-cols-4 gap-2">
-                {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map(size => (
+                {availableFilters.sizes.map(size => (
                   <button 
                     key={size}
                     className={`px-3 py-2 text-sm border rounded hover:border-gray-400 transition-colors ${
@@ -432,13 +451,25 @@ const Shop = () => {
         ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.map(product => (
-                  <div key={product._id} className="group relative overflow-hidden transition-shadow">
+                  <div 
+                    key={product._id} 
+                    className="group relative overflow-hidden transition-shadow cursor-pointer hover:shadow-lg"
+                    onClick={() => handleProductClick(product._id)}
+                  >
                     {/* Product Image */}
                     <div className="aspect-square bg-gray-100 relative overflow-hidden">
                       <img 
-                        src={product.images?.[0]?.url || 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300'} 
+                        src={
+                          product.images?.[0]?.url || 
+                          product.images?.[0] ||
+                          product.image ||
+                          'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300'
+                        } 
                         alt={product.images?.[0]?.alt || product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          e.target.src = 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300';
+                        }}
                       />
                       
                       {/* Discount Badge */}
@@ -469,11 +500,11 @@ const Shop = () => {
                       <h3 className="font-medium text-gray-900 mb-2">{product.name}</h3>
                       <div className="flex items-center gap-2">
                         {product.originalPrice && (
-                          <span className="text-gray-400 line-through text-sm">${product.originalPrice}</span>
+                          <span className="text-gray-400 line-through text-sm">₵{product.originalPrice}</span>
                         )}
-                        <span className="text-gray-900 font-medium">${product.price}</span>
+                        <span className="text-gray-900 font-medium">₵{product.price}</span>
                         {product.priceRange && (
-                          <span className="text-gray-600">– ${product.maxPrice}</span>
+                          <span className="text-gray-600">– ₵{product.maxPrice}</span>
                         )}
                       </div>
                       

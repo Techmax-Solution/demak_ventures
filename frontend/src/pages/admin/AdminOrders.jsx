@@ -306,10 +306,10 @@ const AdminOrders = () => {
                               </div>
                             </div>
                           </td>
-                          <td className="px-4 py-2 text-sm text-gray-900">${item.price?.toFixed(2)}</td>
+                          <td className="px-4 py-2 text-sm text-gray-900">₵{item.price?.toFixed(2)}</td>
                           <td className="px-4 py-2 text-sm text-gray-900">{item.quantity}</td>
                           <td className="px-4 py-2 text-sm font-medium text-gray-900">
-                            ${((item.price || 0) * (item.quantity || 0)).toFixed(2)}
+                            ₵{((item.price || 0) * (item.quantity || 0)).toFixed(2)}
                           </td>
                         </tr>
                       )) || []}
@@ -324,23 +324,23 @@ const AdminOrders = () => {
                   <div className="w-64 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Subtotal:</span>
-                      <span>${(selectedOrder.itemsPrice || 0).toFixed(2)}</span>
+                      <span>₵{(selectedOrder.itemsPrice || 0).toFixed(2)}</span>
                     </div>
                     {selectedOrder.taxPrice > 0 && (
                       <div className="flex justify-between text-sm">
                         <span>Tax:</span>
-                        <span>${selectedOrder.taxPrice.toFixed(2)}</span>
+                        <span>₵{selectedOrder.taxPrice.toFixed(2)}</span>
                       </div>
                     )}
                     {selectedOrder.shippingPrice > 0 && (
                       <div className="flex justify-between text-sm">
                         <span>Shipping:</span>
-                        <span>${selectedOrder.shippingPrice.toFixed(2)}</span>
+                        <span>₵{selectedOrder.shippingPrice.toFixed(2)}</span>
                       </div>
                     )}
                     <div className="flex justify-between text-base font-medium border-t pt-2">
                       <span>Total:</span>
-                      <span>${(selectedOrder.totalPrice || 0).toFixed(2)}</span>
+                      <span>₵{(selectedOrder.totalPrice || 0).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>

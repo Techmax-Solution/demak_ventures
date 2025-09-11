@@ -238,3 +238,29 @@ html {
 .brands-scroll:hover {
   animation-play-state: paused;
 }
+
+/* Top Banner Promotional Message Scrolling */
+@keyframes scrollPromo {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.promo-scroll {
+  animation: scrollPromo 40s linear infinite;
+}
+
+.promo-scroll:hover {
+  animation-play-state: paused;
+}
+
+.promo-scroll-mobile {
+  animation: scrollPromo 25s linear infinite;
+}
+
+.promo-scroll-mobile:hover {
+  animation-play-state: paused;
+}

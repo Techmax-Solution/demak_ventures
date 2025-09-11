@@ -138,8 +138,8 @@ const AdminDashboard = () => {
 
           <StatCard
             title="Revenue"
-            value={`$${stats.revenue.total.toLocaleString()}`}
-            subtitle={`$${stats.revenue.thisMonth.toLocaleString()} this month`}
+            value={`₵${stats.revenue.total.toLocaleString()}`}
+            subtitle={`₵${stats.revenue.thisMonth.toLocaleString()} this month`}
             color="purple"
             icon={
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -196,7 +196,7 @@ const AdminDashboard = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ${order.totalPrice?.toFixed(2) || '0.00'}
+                        ₵{order.totalPrice?.toFixed(2) || '0.00'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(order.createdAt).toLocaleDateString()}

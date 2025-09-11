@@ -441,7 +441,7 @@ const Checkout = () => {
                     : 'bg-blue-600 hover:bg-blue-700 text-white'
                 }`}
               >
-                {isSubmitting ? 'Processing Order...' : `Place Order - $${total.toFixed(2)}`}
+                {isSubmitting ? 'Processing Order...' : `Place Order - ₵${total.toFixed(2)}`}
               </button>
             </form>
           </div>
@@ -466,7 +466,7 @@ const Checkout = () => {
                       {item.color && <p className="text-xs text-gray-600">Color: {item.color}</p>}
                     </div>
                     <div className="text-right">
-                      <p className="font-medium text-gray-800">${(item.price * item.quantity).toFixed(2)}</p>
+                      <p className="font-medium text-gray-800">₵{(item.price * item.quantity).toFixed(2)}</p>
                       <p className="text-xs text-gray-600">Qty: {item.quantity}</p>
                     </div>
                   </div>
@@ -477,7 +477,7 @@ const Checkout = () => {
               <div className="space-y-3 mb-6 border-t border-gray-200 pt-4">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal:</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>₵{subtotal.toFixed(2)}</span>
                 </div>
                 
                 <div className="flex justify-between text-gray-600">
@@ -487,13 +487,13 @@ const Checkout = () => {
                 
                 <div className="flex justify-between text-gray-600">
                   <span>Tax:</span>
-                  <span>${tax.toFixed(2)}</span>
+                  <span>₵{tax.toFixed(2)}</span>
                 </div>
                 
                 <div className="border-t border-gray-200 pt-3">
                   <div className="flex justify-between text-lg font-semibold text-gray-800">
                     <span>Total:</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span>₵{total.toFixed(2)}</span>
                   </div>
                 </div>
               </div>

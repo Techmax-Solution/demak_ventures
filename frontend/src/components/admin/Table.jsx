@@ -54,7 +54,7 @@ const Table = ({
     }
     
     if (column.type === 'currency') {
-      return `$${parseFloat(value || 0).toFixed(2)}`;
+      return `₵${parseFloat(value || 0).toFixed(2)}`;
     }
     
     if (column.type === 'status') {

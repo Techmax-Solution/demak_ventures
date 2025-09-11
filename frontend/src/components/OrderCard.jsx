@@ -64,9 +64,9 @@ const OrderCard = ({ order }) => {
               </div>
             </div>
             <div className="text-right">
-              <p className="font-medium text-gray-800">${item.price}</p>
+              <p className="font-medium text-gray-800">₵{item.price}</p>
               <p className="text-sm text-gray-600">
-                ${(item.price * item.quantity).toFixed(2)}
+                ₵{(item.price * item.quantity).toFixed(2)}
               </p>
             </div>
           </div>
@@ -81,23 +81,23 @@ const OrderCard = ({ order }) => {
       <div className="border-t border-gray-200 pt-4">
         <div className="flex justify-between items-center mb-2">
           <span className="text-gray-600">Subtotal:</span>
-          <span className="text-gray-800">${order.subtotal?.toFixed(2) || '0.00'}</span>
+          <span className="text-gray-800">₵{order.subtotal?.toFixed(2) || '0.00'}</span>
         </div>
         {order.shipping && (
           <div className="flex justify-between items-center mb-2">
             <span className="text-gray-600">Shipping:</span>
-            <span className="text-gray-800">${order.shipping.toFixed(2)}</span>
+            <span className="text-gray-800">₵{order.shipping.toFixed(2)}</span>
           </div>
         )}
         {order.tax && (
           <div className="flex justify-between items-center mb-2">
             <span className="text-gray-600">Tax:</span>
-            <span className="text-gray-800">${order.tax.toFixed(2)}</span>
+            <span className="text-gray-800">₵{order.tax.toFixed(2)}</span>
           </div>
         )}
         <div className="flex justify-between items-center font-semibold text-lg border-t border-gray-200 pt-2">
           <span className="text-gray-800">Total:</span>
-          <span className="text-gray-800">${order.total?.toFixed(2) || '0.00'}</span>
+          <span className="text-gray-800">₵{order.total?.toFixed(2) || '0.00'}</span>
         </div>
       </div>
 

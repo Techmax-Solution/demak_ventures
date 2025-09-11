@@ -157,7 +157,7 @@ orderSchema.pre('save', function(next) {
     // Calculate tax (assuming 8.5% tax rate)
     this.taxPrice = Math.round((this.itemsPrice * 0.085) * 100) / 100;
     
-    // Calculate shipping (free shipping over $100, otherwise $10)
+    // Calculate shipping (free shipping over ₵100, otherwise ₵10)
     this.shippingPrice = this.itemsPrice > 100 ? 0 : 10;
     
     // Calculate total price

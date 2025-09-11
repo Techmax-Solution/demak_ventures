@@ -114,12 +114,12 @@ const TrendingProducts = () => {
                         ${product.originalPrice.toFixed(2)}
                       </span>
                       <span className="text-gray-900 font-semibold text-lg">
-                        ${product.price.toFixed(2)}
+                        ₵{product.price.toFixed(2)}
                       </span>
                     </>
                   ) : (
                     <span className="text-gray-900 font-semibold text-lg">
-                      ${product.price.toFixed(2)}
+                      ₵{product.price.toFixed(2)}
                     </span>
                   )}
                 </div>

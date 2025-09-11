@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { AdminProvider } from './context/AdminContext';
+import ScrollToTop from './components/ScrollToTop';
+import TopBanner from './components/TopBanner';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -24,6 +26,7 @@ function App() {
     <CartProvider>
       <AdminProvider>
         <Router>
+          <ScrollToTop />
           <Routes>
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
@@ -56,6 +59,7 @@ function App() {
             {/* Public Routes */}
             <Route path="/*" element={
               <div className="min-h-screen flex flex-col">
+                <TopBanner />
                 <Navbar />
                 <main className="flex-1">
                   <Routes>

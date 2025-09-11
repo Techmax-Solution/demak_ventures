@@ -102,7 +102,7 @@ const Cart = () => {
                     )}
 
                     <p className="text-lg font-semibold text-gray-800">
-                      ${item.price.toFixed(2)}
+                      ₵{item.price.toFixed(2)}
                     </p>
                   </div>
 
@@ -128,7 +128,7 @@ const Cart = () => {
 
                     <div className="text-right">
                       <p className="text-lg font-bold text-gray-800">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        ₵{(item.price * item.quantity).toFixed(2)}
                       </p>
                       <button
                         onClick={() => removeFromCart(item.key)}
@@ -151,7 +151,7 @@ const Cart = () => {
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal ({totalItems} items):</span>
-                  <span>${totalPrice.toFixed(2)}</span>
+                  <span>₵{totalPrice.toFixed(2)}</span>
                 </div>
                 
                 <div className="flex justify-between text-gray-600">
@@ -161,13 +161,13 @@ const Cart = () => {
                 
                 <div className="flex justify-between text-gray-600">
                   <span>Tax:</span>
-                  <span>${(totalPrice * 0.08).toFixed(2)}</span>
+                  <span>₵{(totalPrice * 0.08).toFixed(2)}</span>
                 </div>
                 
                 <div className="border-t border-gray-200 pt-3">
                   <div className="flex justify-between text-lg font-semibold text-gray-800">
                     <span>Total:</span>
-                    <span>${(totalPrice + totalPrice * 0.08).toFixed(2)}</span>
+                    <span>₵{(totalPrice + totalPrice * 0.08).toFixed(2)}</span>
                   </div>
                 </div>
               </div>

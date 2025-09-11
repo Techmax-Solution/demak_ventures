@@ -72,33 +72,30 @@ export const getProducts = async (filters = {}) => {
   try {
     const params = new URLSearchParams();
     
-    // Handle multiple categories (empty array means show all categories)
+    // Handle multiple categories - backend expects single category parameter for each
     if (filters.categories && filters.categories.length > 0) {
-      filters.categories.forEach(category => {
-        params.append('category', category);
-      });
+      // For multiple categories, we'll use the first one or handle it client-side
+      // Backend currently supports single category filter
+      params.append('category', filters.categories[0]);
     }
-    // If categories array is empty, don't add any category filter (shows all products)
     
     // Handle price range
     if (filters.priceRange && Array.isArray(filters.priceRange)) {
       const [min, max] = filters.priceRange;
-      if (min) params.append('minPrice', min.toString());
-      if (max) params.append('maxPrice', max.toString());
+      if (min !== undefined) params.append('minPrice', min.toString());
+      if (max !== undefined) params.append('maxPrice', max.toString());
     }
     
-    // Handle colors
+    // Handle colors - backend expects single color parameter for each
     if (filters.colors && filters.colors.length > 0) {
-      filters.colors.forEach(color => {
-        params.append('color', color);
-      });
+      // For multiple colors, use the first one or handle client-side
+      params.append('color', filters.colors[0]);
     }
     
-    // Handle sizes
+    // Handle sizes - backend expects single size parameter
     if (filters.sizes && filters.sizes.length > 0) {
-      filters.sizes.forEach(size => {
-        params.append('size', size);
-      });
+      // For multiple sizes, use the first one or handle client-side
+      params.append('size', filters.sizes[0]);
     }
     
     // Handle sorting
@@ -118,10 +115,25 @@ export const getProducts = async (filters = {}) => {
       }
     }
 
+    // Add pagination parameters
+    params.append('limit', '50'); // Get more products for client-side filtering
+
+    console.log('Fetching products with params:', params.toString());
     const response = await api.get(`/products?${params.toString()}`);
+    
+    // Return the products array from the response
     return response.data.products || [];
   } catch (error) {
     console.error('Error fetching products:', error);
+    
+    // Enhance error information for better debugging
+    if (error.response) {
+      console.error('Response status:', error.response.status);
+      console.error('Response data:', error.response.data);
+    } else if (error.request) {
+      console.error('No response received:', error.request);
+    }
+    
     throw error;
   }
 };
@@ -142,6 +154,16 @@ export const searchProducts = async (query) => {
     return response.data;
   } catch (error) {
     console.error('Error searching products:', error);
+    throw error;
+  }
+};
+
+export const getProductFilters = async () => {
+  try {
+    const response = await api.get('/products/filters');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching product filters:', error);
     throw error;
   }
 };
