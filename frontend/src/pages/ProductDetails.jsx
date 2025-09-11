@@ -168,7 +168,7 @@ const ProductDetails = () => {
                 <>
                   <button
                     onClick={() => setSelectedImageIndex(selectedImageIndex > 0 ? selectedImageIndex - 1 : images.length - 1)}
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 shadow-lg transition-all"
+                    className="absolute left-4 top-1/3 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 shadow-lg transition-all"
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -176,7 +176,7 @@ const ProductDetails = () => {
                   </button>
                   <button
                     onClick={() => setSelectedImageIndex(selectedImageIndex < images.length - 1 ? selectedImageIndex + 1 : 0)}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 shadow-lg transition-all"
+                    className="absolute right-4 top-1/3 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 shadow-lg transition-all"
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -230,55 +230,79 @@ const ProductDetails = () => {
             </div>
 
               <div className="flex items-center gap-3">
-                {/* Default colors if none provided */}
-                {(!product.colors || product.colors.length === 0) ? (
-                  <>
-                    <button
-                      onClick={() => setSelectedColor('Black')}
-                      className={`w-10 h-10 rounded-full border-2 transition-all ${
-                        selectedColor === 'Black' || !selectedColor 
-                          ? 'border-black border-4' 
-                          : 'border-gray-300'
-                      }`}
-                      style={{ backgroundColor: '#000000' }}
-                      title="Black"
-                    />
-                    <button
-                      onClick={() => setSelectedColor('Pink')}
-                      className={`w-10 h-10 rounded-full border-2 transition-all ${
-                        selectedColor === 'Pink' 
-                          ? 'border-pink-400 border-4' 
-                          : 'border-gray-300'
-                      }`}
-                      style={{ backgroundColor: '#F8BBD9' }}
-                      title="Pink"
-                    />
-                    <button
-                      onClick={() => setSelectedColor('White')}
-                      className={`w-10 h-10 rounded-full border-2 transition-all ${
-                        selectedColor === 'White' 
-                          ? 'border-gray-400 border-4' 
-                          : 'border-gray-300'
-                      }`}
-                      style={{ backgroundColor: '#FFFFFF' }}
-                      title="White"
-                    />
-                  </>
-                ) : (
-                  product.colors.map((colorObj, index) => (
-                    <button
-                          key={index}
-                      onClick={() => setSelectedColor(colorObj.color)}
-                      className={`w-10 h-10 rounded-full border-2 transition-all ${
-                        selectedColor === colorObj.color 
-                          ? 'border-gray-800 border-4' 
-                          : 'border-gray-300'
-                      }`}
-                      style={{ backgroundColor: colorObj.hexCode || colorObj.color }}
-                      title={colorObj.color}
-                    />
-                  ))
-                )}
+                {/* Helper function to get color hex codes */}
+                {(() => {
+                  const getColorHex = (colorName) => {
+                    const colorMap = {
+                      'black': '#000000',
+                      'white': '#FFFFFF',
+                      'red': '#DC2626',
+                      'blue': '#2563EB',
+                      'green': '#16A34A',
+                      'yellow': '#EAB308',
+                      'pink': '#EC4899',
+                      'purple': '#9333EA',
+                      'orange': '#EA580C',
+                      'gray': '#6B7280',
+                      'grey': '#6B7280',
+                      'brown': '#A3754F',
+                      'beige': '#F5F5DC',
+                      'navy': '#1E3A8A',
+                      'maroon': '#7F1D1D',
+                      'teal': '#0D9488',
+                      'lime': '#65A30D',
+                      'cyan': '#0891B2',
+                      'indigo': '#4F46E5',
+                      'rose': '#F43F5E',
+                      'amber': '#F59E0B',
+                      'emerald': '#059669',
+                      'violet': '#7C3AED',
+                      'fuchsia': '#C026D3',
+                      'sky': '#0EA5E9',
+                      'slate': '#475569'
+                    };
+                    return colorMap[colorName.toLowerCase()] || '#6B7280';
+                  };
+
+                  // Default colors if none provided
+                  if (!product.colors || product.colors.length === 0) {
+                    const defaultColors = ['Black', 'Pink', 'White'];
+                    return defaultColors.map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => setSelectedColor(color)}
+                        className={`w-10 h-10 rounded-full border-2 transition-all ${
+                          selectedColor === color || (!selectedColor && color === 'Black')
+                            ? (color === 'White' ? 'border-gray-400 border-4' : 'border-black border-4')
+                            : 'border-gray-300'
+                        }`}
+                        style={{ backgroundColor: getColorHex(color) }}
+                        title={color}
+                      />
+                    ));
+                  }
+
+                  // Product has colors - handle both string array and object array
+                  return product.colors.map((colorItem, index) => {
+                    const colorName = typeof colorItem === 'string' ? colorItem : colorItem.color || colorItem.name;
+                    const hexCode = typeof colorItem === 'object' ? colorItem.hexCode || colorItem.hex : null;
+                    const backgroundColor = hexCode || getColorHex(colorName);
+                    
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedColor(colorName)}
+                        className={`w-10 h-10 rounded-full border-2 transition-all ${
+                          selectedColor === colorName 
+                            ? (colorName.toLowerCase() === 'white' ? 'border-gray-400 border-4' : 'border-black border-4')
+                            : 'border-gray-300'
+                        }`}
+                        style={{ backgroundColor }}
+                        title={colorName}
+                      />
+                    );
+                  });
+                })()}
               </div>
             </div>
 

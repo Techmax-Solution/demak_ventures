@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo, startTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import { getProducts, getProductFilters } from '../services/api';
@@ -8,6 +8,7 @@ const Shop = () => {
   const [allProducts, setAllProducts] = useState([]); // Store all products from API
   const [products, setProducts] = useState([]); // Filtered products for display
   const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState(null);
   const [availableFilters, setAvailableFilters] = useState({
     categories: [],
@@ -25,18 +26,8 @@ const Shop = () => {
   
   const [priceSliderValue, setPriceSliderValue] = useState([40, 210]);
 
-  // Fetch all products and filters on component mount
-  useEffect(() => {
-    fetchAllProducts();
-    fetchAvailableFilters();
-  }, []);
-
-  // Apply filters to products whenever filters change
-  useEffect(() => {
-    applyFilters();
-  }, [filters, allProducts]);
-
-  const fetchAllProducts = async () => {
+  // Define callback functions first
+  const fetchAllProducts = useCallback(async () => {
     try {
       setLoading(true);
       console.log('Fetching all products...');
@@ -46,18 +37,15 @@ const Shop = () => {
       // Ensure data is an array
       if (Array.isArray(data)) {
         setAllProducts(data);
-        setProducts(data); // Initially show all products
         setError(null);
       } else {
         console.error('Products data is not an array:', data);
         setAllProducts([]);
-        setProducts([]);
         setError('Invalid data format received from server.');
       }
     } catch (err) {
       console.error('Error fetching products:', err);
       setAllProducts([]);
-      setProducts([]);
       if (err.code === 'NETWORK_ERROR' || err.message.includes('Network Error')) {
         setError('Cannot connect to server. Please make sure the backend is running on http://localhost:5000');
       } else if (err.response?.status === 404) {
@@ -67,44 +55,58 @@ const Shop = () => {
       }
     } finally {
       setLoading(false);
+      setInitialLoading(false);
     }
-  };
+  }, []);
 
-  const fetchAvailableFilters = async () => {
+  const fetchAvailableFilters = useCallback(async () => {
     try {
       console.log('Fetching available filters...');
       const filterData = await getProductFilters();
       console.log('Received filter data:', filterData);
       
-      setAvailableFilters({
+      const newFilters = {
         categories: filterData.categories || [],
         colors: filterData.colors || [],
         sizes: filterData.sizes || [],
         priceRange: filterData.priceRange || { minPrice: 40, maxPrice: 210 }
-      });
+      };
+      
+      setAvailableFilters(newFilters);
 
       // Update initial price range based on backend data
-      const { minPrice, maxPrice } = filterData.priceRange || { minPrice: 40, maxPrice: 210 };
+      const { minPrice, maxPrice } = newFilters.priceRange;
+      const newPriceRange = [minPrice, maxPrice];
+      
+      // Batch state updates to prevent multiple re-renders
       setFilters(prev => ({
         ...prev,
-        priceRange: [minPrice, maxPrice]
+        priceRange: newPriceRange
       }));
-      setPriceSliderValue([minPrice, maxPrice]);
+      setPriceSliderValue(newPriceRange);
       
     } catch (err) {
       console.error('Error fetching filters:', err);
       // Use default values if filters fetch fails
-      setAvailableFilters({
+      const defaultFilters = {
         categories: ['accessories', 'bag', 'men', 'shoes', 'tops', 'women'],
         colors: ['beige', 'black', 'gray', 'yellow', 'pink', 'red'],
         sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
         priceRange: { minPrice: 40, maxPrice: 210 }
-      });
+      };
+      setAvailableFilters(defaultFilters);
     }
-  };
+  }, []);
 
-  const applyFilters = () => {
-    if (allProducts.length === 0) return;
+  // Fetch all products and filters on component mount
+  useEffect(() => {
+    fetchAllProducts();
+    fetchAvailableFilters();
+  }, [fetchAllProducts, fetchAvailableFilters]);
+
+  // Memoized filter application to prevent unnecessary re-renders
+  const filteredProducts = useMemo(() => {
+    if (allProducts.length === 0) return [];
 
     let filtered = [...allProducts];
 
@@ -156,67 +158,89 @@ const Shop = () => {
         filtered.sort((a, b) => a.name.localeCompare(b.name));
     }
 
-    setProducts(filtered);
-  };
+    return filtered;
+  }, [allProducts, filters.categories, filters.priceRange, filters.colors, filters.sizes, filters.sortBy]);
 
-  const handleFilterChange = (filterType, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [filterType]: value
-    }));
-  };
+  // Update products state only when filteredProducts changes (non-urgent update)
+  useEffect(() => {
+    startTransition(() => {
+      setProducts(filteredProducts);
+    });
+  }, [filteredProducts]);
 
-  const handleCategoryChange = (category, checked) => {
-    if (category === 'all') {
-      // If "All" is selected, clear all other categories
+  const handleFilterChange = useCallback((filterType, value) => {
+    startTransition(() => {
       setFilters(prev => ({
         ...prev,
-        categories: checked ? [] : prev.categories
+        [filterType]: value
       }));
-    } else {
+    });
+  }, []);
+
+  const handleCategoryChange = useCallback((category, checked) => {
+    startTransition(() => {
+      if (category === 'all') {
+        // If "All" is selected, clear all other categories
+        setFilters(prev => ({
+          ...prev,
+          categories: checked ? [] : prev.categories
+        }));
+      } else {
+        setFilters(prev => ({
+          ...prev,
+          categories: checked 
+            ? [...prev.categories, category.toLowerCase()]
+            : prev.categories.filter(c => c !== category.toLowerCase())
+        }));
+      }
+    });
+  }, []);
+
+  const handleColorChange = useCallback((color) => {
+    startTransition(() => {
       setFilters(prev => ({
         ...prev,
-        categories: checked 
-          ? [...prev.categories, category.toLowerCase()]
-          : prev.categories.filter(c => c !== category.toLowerCase())
+        colors: prev.colors.includes(color)
+          ? prev.colors.filter(c => c !== color)
+          : [...prev.colors, color]
       }));
-    }
-  };
+    });
+  }, []);
 
-  const handleColorChange = (color) => {
-    setFilters(prev => ({
-      ...prev,
-      colors: prev.colors.includes(color)
-        ? prev.colors.filter(c => c !== color)
-        : [...prev.colors, color]
-    }));
-  };
+  const handleSizeChange = useCallback((size) => {
+    startTransition(() => {
+      setFilters(prev => ({
+        ...prev,
+        sizes: prev.sizes.includes(size)
+          ? prev.sizes.filter(s => s !== size)
+          : [...prev.sizes, size]
+      }));
+    });
+  }, []);
 
-  const handleSizeChange = (size) => {
-    setFilters(prev => ({
-      ...prev,
-      sizes: prev.sizes.includes(size)
-        ? prev.sizes.filter(s => s !== size)
-        : [...prev.sizes, size]
-    }));
-  };
-
-  const handlePriceRangeChange = (event) => {
+  const handlePriceRangeChange = useCallback((event) => {
     const value = parseInt(event.target.value);
     const minPrice = availableFilters.priceRange.minPrice || 40;
     const newRange = [minPrice, value];
+    
+    // Update slider value immediately for responsive UI
     setPriceSliderValue(newRange);
-    setFilters(prev => ({
-      ...prev,
-      priceRange: newRange
-    }));
-  };
+    
+    // Use startTransition for filter update to prevent blocking
+    startTransition(() => {
+      setFilters(prev => ({
+        ...prev,
+        priceRange: newRange
+      }));
+    });
+  }, [availableFilters.priceRange.minPrice]);
 
-  const handleProductClick = (productId) => {
+  const handleProductClick = useCallback((productId) => {
     navigate(`/product/${productId}`);
-  };
+  }, [navigate]);
 
-  if (loading) {
+  // Show full-page loader only on initial load
+  if (initialLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -444,7 +468,21 @@ const Shop = () => {
         </div>
 
         {/* Products Grid */}
-        {products.length === 0 ? (
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Loading Skeleton */}
+            {[...Array(6)].map((_, index) => (
+              <div key={index} className="bg-white rounded-lg shadow-sm overflow-hidden animate-pulse">
+                <div className="aspect-square bg-gray-200"></div>
+                <div className="p-4 space-y-3">
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : products.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-600 text-lg">No products found matching your criteria.</p>
           </div>
@@ -511,16 +549,56 @@ const Shop = () => {
                       {/* Color Options */}
                       {product.colors && (
                         <div className="flex gap-1 mt-3">
-                          {product.colors.map((color, index) => (
-                            <div 
-                              key={index}
-                              className={`w-6 h-6 rounded-full border-2 border-gray-200 cursor-pointer ${
-                                color === 'black' ? 'bg-black' : 
-                                color === 'pink' ? 'bg-pink-200' : 
-                                'bg-gray-300'
-                              }`}
-                            ></div>
-                          ))}
+                          {product.colors.map((color, index) => {
+                            // Helper function to get color hex codes
+                            const getColorHex = (colorName) => {
+                              const colorMap = {
+                                'black': '#000000',
+                                'white': '#FFFFFF',
+                                'red': '#DC2626',
+                                'blue': '#2563EB',
+                                'green': '#16A34A',
+                                'yellow': '#EAB308',
+                                'pink': '#EC4899',
+                                'purple': '#9333EA',
+                                'orange': '#EA580C',
+                                'gray': '#6B7280',
+                                'grey': '#6B7280',
+                                'brown': '#A3754F',
+                                'beige': '#F5F5DC',
+                                'navy': '#1E3A8A',
+                                'maroon': '#7F1D1D',
+                                'teal': '#0D9488',
+                                'lime': '#65A30D',
+                                'cyan': '#0891B2',
+                                'indigo': '#4F46E5',
+                                'rose': '#F43F5E',
+                                'amber': '#F59E0B',
+                                'emerald': '#059669',
+                                'violet': '#7C3AED',
+                                'fuchsia': '#C026D3',
+                                'sky': '#0EA5E9',
+                                'slate': '#475569'
+                              };
+                              return colorMap[colorName.toLowerCase()] || '#6B7280';
+                            };
+
+                            // Handle both string and object color formats
+                            const colorName = typeof color === 'string' ? color : color.color || color.name;
+                            const hexCode = typeof color === 'object' ? color.hexCode || color.hex : null;
+                            const backgroundColor = hexCode || getColorHex(colorName);
+
+                            return (
+                              <div 
+                                key={index}
+                                className={`w-6 h-6 rounded-full border-2 cursor-pointer ${
+                                  colorName.toLowerCase() === 'white' ? 'border-gray-300' : 'border-gray-200'
+                                }`}
+                                style={{ backgroundColor }}
+                                title={colorName}
+                              ></div>
+                            );
+                          })}
                         </div>
                       )}
                     </div>

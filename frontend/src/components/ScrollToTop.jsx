@@ -1,12 +1,15 @@
-import { useEffect } from 'react';
+import { useLayoutEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
 
-  useEffect(() => {
-    // Scroll to top when the pathname changes
-    window.scrollTo(0, 0);
+  useLayoutEffect(() => {
+    // Reset scroll position immediately before any DOM updates
+    // This ensures the page starts from the top, not scrolls to it
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    window.pageYOffset = 0;
   }, [pathname]);
 
   return null;

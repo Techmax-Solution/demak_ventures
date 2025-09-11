@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { memo, useCallback } from 'react';
 
-const ProductCard = ({ product }) => {
+const ProductCard = memo(({ product }) => {
   const { addToCart, isInCart } = useCart();
 
-  const handleAddToCart = (e) => {
+  const handleAddToCart = useCallback((e) => {
     e.preventDefault(); // Prevent navigation when clicking the button
     
     // For products with sizes, redirect to product details page
@@ -26,7 +27,7 @@ const ProductCard = ({ product }) => {
       button.textContent = originalText;
       button.classList.remove('bg-green-600');
     }, 1000);
-  };
+  }, [product, addToCart]);
 
   return (
     <div className="card group hover:shadow-lg transition-shadow duration-300">
@@ -153,6 +154,8 @@ const ProductCard = ({ product }) => {
       </div>
     </div>
   );
-};
+});
+
+ProductCard.displayName = 'ProductCard';
 
 export default ProductCard;
