@@ -35,6 +35,22 @@ const orderItemSchema = new mongoose.Schema({
 });
 
 const shippingAddressSchema = new mongoose.Schema({
+    firstName: {
+        type: String,
+        required: true
+    },
+    lastName: {
+        type: String,
+        required: true
+    },
+    email: {
+        type: String,
+        required: true
+    },
+    phone: {
+        type: String,
+        required: true
+    },
     street: {
         type: String,
         required: true
@@ -79,7 +95,7 @@ const orderSchema = new mongoose.Schema({
     paymentMethod: {
         type: String,
         required: true,
-        enum: ['PayPal', 'Stripe', 'Credit Card', 'Cash on Delivery']
+        enum: ['PayPal', 'Stripe', 'Credit Card', 'Cash on Delivery', 'Paystack']
     },
     paymentResult: paymentResultSchema,
     itemsPrice: {
@@ -167,11 +183,26 @@ orderSchema.pre('save', function(next) {
 });
 
 // Update payment status
-orderSchema.methods.markAsPaid = function(paymentResult) {
+orderSchema.methods.markAsPaid = async function(paymentResult) {
     this.isPaid = true;
     this.paidAt = Date.now();
     this.paymentResult = paymentResult;
     this.status = 'processing';
+    
+    // If this is a Paystack payment, update product stock now
+    if (this.paymentMethod === 'Paystack') {
+        const Product = mongoose.model('Product');
+        for (let item of this.orderItems) {
+            const product = await Product.findById(item.product);
+            if (product) {
+                const sizeIndex = product.sizes.findIndex(s => s.size === item.size);
+                if (sizeIndex !== -1) {
+                    product.sizes[sizeIndex].quantity -= item.quantity;
+                    await product.save();
+                }
+            }
+        }
+    }
 };
 
 // Update delivery status

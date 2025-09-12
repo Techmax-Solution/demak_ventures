@@ -19,7 +19,7 @@ const Home = () => {
       tagline: "Made From Cotton",
       title: "Soft Wine Red",
       subtitle: "Sweatshirt",
-      bgColor: "from-slate-800 via-slate-700 to-slate-900",
+      bgColor: "from-gray-950 via-gray-900 to-black",
       placeholderIcon: (
         <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -32,7 +32,7 @@ const Home = () => {
       tagline: "Premium Denim",
       title: "Classic Blue",
       subtitle: "Jeans",
-      bgColor: "from-blue-900 via-blue-800 to-slate-900",
+      bgColor: "from-amber-950 via-amber-900 to-stone-900",
       placeholderIcon: (
         <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -45,7 +45,7 @@ const Home = () => {
       tagline: "Summer Collection",
       title: "Elegant White",
       subtitle: "Dress",
-      bgColor: "from-green-900 via-green-800 to-slate-900",
+      bgColor: "from-gray-700 via-gray-600 to-gray-800",
       placeholderIcon: (
         <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -187,7 +187,7 @@ const Home = () => {
       <Newsletter />
 
       {/* Collection Cards Section */}
-      <CollectionCards />
+      {/* <CollectionCards /> */}
 
       {/* Testimonial Section */}
       <Testimonial />

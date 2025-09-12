@@ -107,10 +107,22 @@ const AdminOrders = () => {
     {
       key: 'user',
       title: 'Customer',
-      render: (user) => (
+      render: (user, order) => (
         <div>
-          <div className="font-medium text-gray-900">{user?.name || 'N/A'}</div>
-          <div className="text-sm text-gray-500">{user?.email || 'N/A'}</div>
+          <div className="font-medium text-gray-900">
+            {order?.shippingAddress?.firstName && order?.shippingAddress?.lastName 
+              ? `${order.shippingAddress.firstName} ${order.shippingAddress.lastName}`
+              : user?.name || 'N/A'
+            }
+          </div>
+          <div className="text-sm text-gray-500">
+            {order?.shippingAddress?.email || user?.email || 'N/A'}
+          </div>
+          {order?.shippingAddress?.phone && (
+            <div className="text-xs text-gray-400">
+              {order.shippingAddress.phone}
+            </div>
+          )}
         </div>
       )
     },
@@ -251,12 +263,23 @@ const AdminOrders = () => {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-500">Name:</span>
-                      <span>{selectedOrder.user?.name || 'N/A'}</span>
+                      <span>
+                        {selectedOrder.shippingAddress?.firstName && selectedOrder.shippingAddress?.lastName 
+                          ? `${selectedOrder.shippingAddress.firstName} ${selectedOrder.shippingAddress.lastName}`
+                          : selectedOrder.user?.name || 'N/A'
+                        }
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Email:</span>
-                      <span>{selectedOrder.user?.email || 'N/A'}</span>
+                      <span>{selectedOrder.shippingAddress?.email || selectedOrder.user?.email || 'N/A'}</span>
                     </div>
+                    {selectedOrder.shippingAddress?.phone && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Phone:</span>
+                        <span>{selectedOrder.shippingAddress.phone}</span>
+                      </div>
+                    )}
                     {selectedOrder.shippingAddress && (
                       <>
                         <div className="pt-2">

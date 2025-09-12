@@ -12,6 +12,7 @@ import userRoutes from './routes/users.js';
 import productRoutes from './routes/products.js';
 import orderRoutes from './routes/orders.js';
 import uploadRoutes from './routes/upload.js';
+import paystackRoutes from './routes/paystack.js';
 
 // ES modules dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
@@ -41,7 +42,8 @@ app.get('/', (req, res) => {
             auth: '/api/v1/auth',
             users: '/api/v1/users',
             products: '/api/v1/products',
-            orders: '/api/v1/orders'
+            orders: '/api/v1/orders',
+            paystack: '/api/v1/paystack'
         }
     });
 });
@@ -52,6 +54,7 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/products', productRoutes);
 app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/admin/upload', uploadRoutes);
+app.use('/api/v1/paystack', paystackRoutes);
 
 // Error handling middleware
 app.use(notFound);

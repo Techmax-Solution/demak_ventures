@@ -9,25 +9,25 @@ const ShopByCategory = () => {
     {
       id: 1,
       name: "MEN'S",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+      image: "https://i.pinimg.com/1200x/32/21/06/3221063cd0e08760cdcf5081646dd164.jpg",
       link: "/shop?category=men"
     },
     {
       id: 2,
       name: "WOMEN'S",
-      image: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+      image: "https://i.pinimg.com/1200x/24/65/60/2465601b64678b1c5dc9f8cc81867e6b.jpg",
       link: "/shop?category=women"
     },
     {
       id: 3,
       name: "BAG",
-      image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+      image: "https://i.pinimg.com/736x/6b/cc/27/6bcc27fb586df576a18229fae15ea5a9.jpg",
       link: "/shop?category=bags"
     },
     {
       id: 4,
       name: "SHOES",
-      image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+      image: "https://i.pinimg.com/736x/07/bb/68/07bb684ee825cdfe8147167638b37403.jpg",
       link: "/shop?category=shoes"
     }
   ];

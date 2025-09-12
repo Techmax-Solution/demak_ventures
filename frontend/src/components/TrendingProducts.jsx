@@ -10,7 +10,8 @@ const TrendingProducts = () => {
       originalPrice: 125.00,
       price: 100.00,
       discount: 20,
-      image: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&h=500&fit=crop",
+      image: "https://i.pinimg.com/1200x/65/ba/35/65ba3598f3b39541bcd0750e62784dfd.jpg",
+
       colors: []
     },
     {
@@ -20,8 +21,8 @@ const TrendingProducts = () => {
       originalPrice: 70.00,
       price: 90.00,
       discount: 25,
+      image: "https://i.pinimg.com/1200x/f2/96/5d/f2965dcb631d9a66dbb53261a9e1a7db.jpg",
       isHot: true,
-      image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=500&fit=crop",
       colors: ['#E6B3FF', '#FFB3BA', '#BAFFC9']
     },
     {
@@ -31,7 +32,7 @@ const TrendingProducts = () => {
       originalPrice: 100.00,
       price: 90.00,
       discount: 10,
-      image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=500&fit=crop",
+      image: "https://i.pinimg.com/736x/fc/7f/dc/fc7fdc769b7aa66b68940d088b307b2b.jpg",
       colors: ['#000000', '#D2B48C']
     },
     {
@@ -42,7 +43,7 @@ const TrendingProducts = () => {
       price: 110.00,
       discount: 22,
       isHot: true,
-      image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400&h=500&fit=crop",
+      image: "https://i.pinimg.com/736x/87/e6/6c/87e66c896b8c3ce94985433c45f88975.jpg",
       colors: ['#000000', '#8B4513']
     }
   ];

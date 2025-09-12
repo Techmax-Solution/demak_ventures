@@ -298,5 +298,28 @@ export const clearCart = async () => {
   }
 };
 
+// Paystack API calls
+export const paystackAPI = {
+  initializePayment: async (paymentData) => {
+    try {
+      const response = await api.post('/paystack/initialize', paymentData);
+      return response.data;
+    } catch (error) {
+      console.error('Error initializing Paystack payment:', error);
+      throw error;
+    }
+  },
+
+  verifyPayment: async (reference) => {
+    try {
+      const response = await api.post('/paystack/verify', { reference });
+      return response.data;
+    } catch (error) {
+      console.error('Error verifying Paystack payment:', error);
+      throw error;
+    }
+  }
+};
+
 // Export the axios instance for direct use if needed
 export default api;

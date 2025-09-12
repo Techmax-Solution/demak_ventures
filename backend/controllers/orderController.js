@@ -10,7 +10,10 @@ export const createOrder = async (req, res) => {
             orderItems,
             shippingAddress,
             paymentMethod,
-            couponCode
+            couponCode,
+            paymentResult,
+            isPaid,
+            paidAt
         } = req.body;
 
         if (orderItems && orderItems.length === 0) {
@@ -38,17 +41,27 @@ export const createOrder = async (req, res) => {
             user: req.user._id,
             shippingAddress,
             paymentMethod,
-            couponCode
+            couponCode,
+            paymentResult,
+            isPaid: isPaid || false,
+            paidAt: paidAt || null
         });
 
         const createdOrder = await order.save();
 
-        // Update product stock
-        for (let item of orderItems) {
-            const product = await Product.findById(item.product);
-            const sizeIndex = product.sizes.findIndex(s => s.size === item.size);
-            product.sizes[sizeIndex].quantity -= item.quantity;
-            await product.save();
+        // Update stock based on payment status
+        if (paymentMethod !== 'Paystack' || isPaid) {
+            // Update product stock for non-Paystack payments or already-paid Paystack orders
+            for (let item of orderItems) {
+                const product = await Product.findById(item.product);
+                if (product) {
+                    const sizeIndex = product.sizes.findIndex(s => s.size === item.size);
+                    if (sizeIndex !== -1) {
+                        product.sizes[sizeIndex].quantity -= item.quantity;
+                        await product.save();
+                    }
+                }
+            }
         }
 
         res.status(201).json(createdOrder);
@@ -93,7 +106,7 @@ export const updateOrderToPaid = async (req, res) => {
         if (order) {
             // Check if user owns the order or is admin
             if (order.user.toString() === req.user._id.toString() || req.user.role === 'admin') {
-                order.markAsPaid(req.body);
+                await order.markAsPaid(req.body);
                 const updatedOrder = await order.save();
                 res.json(updatedOrder);
             } else {

@@ -22,10 +22,10 @@ const Newsletter = () => {
   return (
     <section className="relative bg-gray-100 overflow-hidden">
       <div className="container mx-auto px-4">
-        <div className="grid lg:grid-cols-2 min-h-[400px] lg:min-h-[500px]">
+        <div className="grid lg:grid-cols-2 h-[400px]">
           
           {/* Left Side - Newsletter Content */}
-          <div className="flex items-center justify-center px-4 py-12 sm:px-8 lg:px-16 lg:py-16">
+          <div className="flex items-center justify-center px-4 py-6 sm:px-8 lg:px-12 lg:py-8">
             <div className="max-w-md w-full">
               <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-light text-gray-900 mb-4 sm:mb-6 tracking-wide text-center lg:text-left">
                 OUR NEWSLETTER
@@ -65,16 +65,16 @@ const Newsletter = () => {
           </div>
 
           {/* Right Side - Model Image */}
-          <div className="relative bg-gray-200 flex items-center justify-center order-first lg:order-last h-64 sm:h-80 lg:h-auto">
+          <div className="relative bg-gray-200 flex items-center justify-center order-first lg:order-last h-64 sm:h-80 lg:h-100">
             {/* Background overlay for better image blending */}
             <div className="absolute inset-0 bg-gradient-to-l from-gray-300 to-gray-200"></div>
             
             {/* Model Image */}
             <div className="relative z-10 w-full h-full flex items-center justify-center">
               <img 
-                src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600&h=500&fit=crop&crop=center"
+                src="https://i.pinimg.com/736x/de/dd/3d/dedd3d8f3ec58659e569f95cbdcb027f.jpg"
                 alt="Woman holding brown bag"
-                className="w-full h-full object-cover object-center"
+                className="w-full h-full object-contain object-center"
                 onError={(e) => {
                   // Fallback to another fashion image
                   e.target.src = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&h=500&fit=crop&crop=center";

@@ -13,8 +13,8 @@ const NewArrivals = () => {
       maxPrice: 90.00,
       discount: 25,
       originalPrice: 120.00,
-      image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400&h=500&fit=crop&crop=center",
-      hoverImage: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=500&fit=crop&crop=center",
+      image: "https://i.pinimg.com/736x/7c/77/ce/7c77ce449fa6448e8d0bcd8be5be920e.jpg",
+      hoverImage: "https://i.pinimg.com/1200x/86/c2/d2/86c2d2b12369cc94ca3d5cf8ee9dcf9b.jpg",
       colors: ['#FCD34D', '#EF4444'],
       rating: 4.8,
       reviews: 127
@@ -28,8 +28,8 @@ const NewArrivals = () => {
       discount: 25,
       originalPrice: 120.00,
       isHot: true,
-      image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=500&fit=crop&crop=center",
-      hoverImage: "https://images.unsplash.com/photo-1583743814966-8936f37f4678?w=400&h=500&fit=crop&crop=center",
+      image: "https://i.pinimg.com/736x/a3/63/87/a36387ffe3736c9dfd9a691fe7e45025.jpg",
+      hoverImage: "https://i.pinimg.com/736x/33/2e/4e/332e4efac03e109718245d7b2faff9c2.jpg",
       colors: ['#C084FC', '#F8BBD9', '#BEF264'],
       rating: 4.9,
       reviews: 203
@@ -42,8 +42,8 @@ const NewArrivals = () => {
       maxPrice: 135.00,
       discount: 22,
       originalPrice: 175.00,
-      image: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=400&h=500&fit=crop&crop=center",
-      hoverImage: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=500&fit=crop&crop=center",
+      image: "https://i.pinimg.com/736x/c8/bb/3e/c8bb3e36740b0b456f9e7774532c4e9f.jpg",
+      hoverImage: "https://i.pinimg.com/736x/34/f7/f9/34f7f941cb4f137b59aaa7196b022479.jpg",
       colors: ['#F59E0B', '#F8BBD9', '#C084FC'],
       rating: 4.7,
       reviews: 89
@@ -77,14 +77,14 @@ const NewArrivals = () => {
 
         {/* Products Grid */}
         <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-            {newArrivalsProducts.map((product) => (
-              <div 
-                key={product.id} 
-                className="group cursor-pointer"
-                onMouseEnter={() => setHoveredProduct(product.id)}
-                onMouseLeave={() => setHoveredProduct(null)}
-              >
+           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 items-end">
+             {newArrivalsProducts.map((product, index) => (
+               <div 
+                 key={product.id} 
+                 className={`group cursor-pointer ${index === 1 ? 'transform scale-y-90 -translate-y-2' : ''}`}
+                 onMouseEnter={() => setHoveredProduct(product.id)}
+                 onMouseLeave={() => setHoveredProduct(null)}
+               >
                 {/* Enhanced Product Card */}
                 <div className="bg-white  overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
                   

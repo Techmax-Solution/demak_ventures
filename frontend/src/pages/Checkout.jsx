@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useUser } from '../context/UserContext';
-import { createOrder } from '../services/api';
+import { createOrder, paystackAPI } from '../services/api';
 
 const Checkout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { cartItems, totalPrice, clearCart } = useCart();
-  const { isAuthenticated, loading } = useUser();
+  const { isAuthenticated, loading, user } = useUser();
   
   const [formData, setFormData] = useState({
     // Shipping Information
@@ -36,6 +36,334 @@ const Checkout = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderId, setOrderId] = useState(null);
+  const [currentOrder, setCurrentOrder] = useState(null);
+  const [paymentStep, setPaymentStep] = useState('form'); // 'form', 'payment', 'success'
+
+  // Calculate totals
+  const subtotal = totalPrice;
+  const tax = totalPrice * 0.08;
+  const shipping = 0;
+  const total = subtotal + tax + shipping;
+
+  // Paystack payment handlers
+  const initializePaystackPayment = () => {
+    if (!currentOrder) {
+      console.error('No current order found');
+      setPaymentStep('form');
+      return;
+    }
+    
+    // Check if Paystack script is loaded
+    if (!window.PaystackPop) {
+      console.error('PaystackPop not available');
+      alert('Payment system is loading. Please try again in a moment.');
+      setPaymentStep('form');
+      return;
+    }
+
+    console.log('Initializing Paystack payment with:', {
+      orderId: currentOrder._id,
+      email: formData.email,
+      amount: Math.round(total * 100),
+      total: total
+    });
+
+    try {
+      const handler = window.PaystackPop.setup({
+        key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_test_c827720756c17a27051917f50a45e18e1cb423ae',
+        email: formData.email || user?.email || '',
+        amount: Math.round(total * 100), // Amount in kobo (smallest currency unit)
+        currency: 'GHS', // Ghana Cedis
+        ref: `order_${currentOrder._id}_${Date.now()}`,
+        channels: ['card', 'bank', 'ussd', 'qr', 'mobile_money'],
+        metadata: {
+          orderId: currentOrder._id,
+          custom_fields: [
+            {
+              display_name: "Order ID",
+              variable_name: "order_id",
+              value: currentOrder._id
+            }
+          ]
+        },
+        callback: async function(response) {
+          console.log('Payment successful:', response);
+          setIsSubmitting(true);
+          
+          try {
+            // Verify payment with backend
+            const verificationResult = await paystackAPI.verifyPayment(response.reference);
+            
+            if (verificationResult.success) {
+              // Clear cart and show success
+              clearCart();
+              setOrderId(currentOrder._id);
+              setOrderSuccess(true);
+              setPaymentStep('success');
+            } else {
+              alert('Payment verification failed. Please contact support.');
+              setPaymentStep('form');
+            }
+          } catch (error) {
+            console.error('Payment verification error:', error);
+            alert('Payment verification failed. Please contact support.');
+            setPaymentStep('form');
+          } finally {
+            setIsSubmitting(false);
+          }
+        },
+        onClose: function() {
+          console.log('Payment popup closed');
+          setPaymentStep('form');
+          setIsSubmitting(false);
+        }
+      });
+
+      console.log('Opening Paystack popup...');
+      handler.openIframe();
+    } catch (error) {
+      console.error('Error initializing Paystack:', error);
+      alert('Failed to initialize payment. Please try again.');
+      setPaymentStep('form');
+      setIsSubmitting(false);
+    }
+  };
+
+  // Initialize Paystack payment with order data (before creating order in database)
+  const initializePaystackPaymentWithOrderData = (orderData) => {
+    // Check if Paystack script is loaded
+    if (!window.PaystackPop) {
+      console.error('PaystackPop not available');
+      alert('Payment system is loading. Please try again in a moment.');
+      setPaymentStep('form');
+      setIsSubmitting(false);
+      return;
+    }
+
+    setPaymentStep('payment');
+
+    const publicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_test_c827720756c17a27051917f50a45e18e1cb423ae';
+    const paymentReference = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    console.log('Initializing Paystack payment with order data:', {
+      email: formData.email,
+      amount: Math.round(total * 100),
+      total: total,
+      reference: paymentReference
+    });
+
+    try {
+      const paymentConfig = {
+        key: publicKey,
+        email: formData.email || user?.email || '',
+        amount: Math.round(total * 100),
+        currency: 'GHS',
+        ref: paymentReference,
+        channels: ['card', 'bank', 'ussd', 'qr', 'mobile_money'],
+        metadata: {
+          orderData: JSON.stringify(orderData),
+          customerEmail: formData.email,
+          custom_fields: [
+            {
+              display_name: "Customer Email",
+              variable_name: "customer_email",
+              value: formData.email
+            }
+          ]
+        },
+        onSuccess: async function(response) {
+          console.log('Payment successful:', response);
+          setIsSubmitting(true);
+          
+          try {
+            console.log('Creating order after successful payment...');
+            
+            // Add payment information to order data
+            const orderDataWithPayment = {
+              ...orderData,
+              paymentResult: {
+                id: response.reference,
+                status: 'success',
+                update_time: new Date().toISOString(),
+                email_address: formData.email,
+                transaction_id: response.trans || response.transaction,
+                reference: response.reference
+              },
+              isPaid: true,
+              paidAt: new Date()
+            };
+            
+            // Create the order in database with payment info
+            const createdOrder = await createOrder(orderDataWithPayment);
+            console.log('Order created successfully:', createdOrder);
+            
+            // Clear cart and show success (skip separate verification since payment is already confirmed by Paystack)
+            clearCart();
+            setOrderId(createdOrder._id);
+            setOrderSuccess(true);
+            setPaymentStep('success');
+            
+          } catch (error) {
+            console.error('Order creation error:', error);
+            console.error('Error details:', {
+              message: error.message,
+              response: error.response?.data,
+              status: error.response?.status
+            });
+            
+            // Show more detailed error message
+            const errorMessage = error.response?.data?.message || error.message || 'Order creation failed';
+            alert('Payment successful but order creation failed. Please contact support with your payment reference: ' + response.reference + '. Error: ' + errorMessage);
+            setPaymentStep('form');
+          } finally {
+            setIsSubmitting(false);
+          }
+        },
+        onCancel: function() {
+          console.log('Payment cancelled by user');
+          setPaymentStep('form');
+          setIsSubmitting(false);
+        }
+      };
+
+      console.log('Opening Paystack popup...');
+      
+      if (window.PaystackPop && typeof window.PaystackPop.setup === 'function') {
+        const handler = window.PaystackPop.setup(paymentConfig);
+        handler.openIframe();
+      } else if (window.Paystack && typeof window.Paystack.newTransaction === 'function') {
+        window.Paystack.newTransaction(paymentConfig);
+      } else {
+        throw new Error('Paystack initialization method not found');
+      }
+    } catch (error) {
+      console.error('Error initializing Paystack:', error);
+      alert(`Failed to initialize payment: ${error.message}. Please try again.`);
+      setPaymentStep('form');
+      setIsSubmitting(false);
+    }
+  };
+
+  // Initialize Paystack payment with specific order (legacy function - keeping for compatibility)
+  const initializePaystackPaymentWithOrder = (order) => {
+    if (!order) {
+      console.error('No order provided');
+      setPaymentStep('form');
+      return;
+    }
+    
+    // Check if Paystack script is loaded
+    if (!window.PaystackPop) {
+      console.error('PaystackPop not available');
+      alert('Payment system is loading. Please try again in a moment.');
+      setPaymentStep('form');
+      return;
+    }
+
+    setPaymentStep('payment');
+
+    const publicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_test_c827720756c17a27051917f50a45e18e1cb423ae';
+    
+    console.log('Initializing Paystack payment with order:', {
+      orderId: order._id,
+      email: formData.email,
+      amount: Math.round(total * 100),
+      total: total,
+      publicKey: publicKey.substring(0, 10) + '...' // Show first 10 chars for debugging
+    });
+
+    if (publicKey === 'pk_test_your_public_key_here') {
+      alert('Please set your VITE_PAYSTACK_PUBLIC_KEY in your .env file');
+      setPaymentStep('form');
+      return;
+    }
+
+    try {
+      // Check if we have the right Paystack object
+      console.log('Available Paystack objects:', {
+        PaystackPop: !!window.PaystackPop,
+        Paystack: !!window.Paystack
+      });
+
+      const paymentConfig = {
+        key: publicKey,
+        email: formData.email || user?.email || '',
+        amount: Math.round(total * 100), // Amount in kobo (smallest currency unit)
+        currency: 'GHS', // Ghana Cedis
+        ref: `order_${order._id}_${Date.now()}`,
+        channels: ['card', 'bank', 'ussd', 'qr', 'mobile_money'],
+        metadata: {
+          orderId: order._id,
+          custom_fields: [
+            {
+              display_name: "Order ID",
+              variable_name: "order_id",
+              value: order._id
+            }
+          ]
+        },
+        onSuccess: async function(response) {
+          console.log('Payment successful:', response);
+          setIsSubmitting(true);
+          
+          try {
+            // Verify payment with backend
+            const verificationResult = await paystackAPI.verifyPayment(response.reference);
+            
+            if (verificationResult.success) {
+              // Clear cart and show success
+              clearCart();
+              setOrderId(order._id);
+              setOrderSuccess(true);
+              setPaymentStep('success');
+            } else {
+              alert('Payment verification failed. Please contact support.');
+              setPaymentStep('form');
+            }
+          } catch (error) {
+            console.error('Payment verification error:', error);
+            alert('Payment verification failed. Please contact support.');
+            setPaymentStep('form');
+          } finally {
+            setIsSubmitting(false);
+          }
+        },
+        onCancel: function() {
+          console.log('Payment popup closed');
+          setPaymentStep('form');
+          setIsSubmitting(false);
+        }
+      };
+
+      console.log('Payment config:', paymentConfig);
+
+      // Try different Paystack initialization methods
+      if (window.PaystackPop && typeof window.PaystackPop.setup === 'function') {
+        console.log('Using PaystackPop.setup');
+        const handler = window.PaystackPop.setup(paymentConfig);
+        console.log('Handler created:', handler);
+        handler.openIframe();
+      } else if (window.Paystack && typeof window.Paystack.newTransaction === 'function') {
+        console.log('Using Paystack.newTransaction');
+        window.Paystack.newTransaction(paymentConfig);
+      } else {
+        throw new Error('Paystack initialization method not found');
+      }
+    } catch (error) {
+      console.error('Error initializing Paystack:', error);
+      alert('Failed to initialize payment. Please try again.');
+      setPaymentStep('form');
+      setIsSubmitting(false);
+    }
+  };
+
+  // Check if Paystack script is loaded
+  useEffect(() => {
+    console.log('Paystack availability check:', {
+      PaystackPop: !!window.PaystackPop,
+      publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY ? 'Set' : 'Not set'
+    });
+  }, []);
 
   // Redirect if cart is empty or user is not authenticated
   useEffect(() => {
@@ -105,7 +433,7 @@ const Checkout = () => {
     setIsSubmitting(true);
 
     try {
-      // Prepare order data for backend to match Order model
+      // Prepare order data (but don't send to backend yet)
       const orderData = {
         orderItems: cartItems.map(item => ({
           product: item.product._id,
@@ -117,38 +445,31 @@ const Checkout = () => {
           color: item.color
         })),
         shippingAddress: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
           street: formData.address,
           city: formData.city,
           state: formData.state,
           zipCode: formData.zipCode,
           country: formData.country
         },
-        paymentMethod: 'Credit Card',
+        paymentMethod: 'Paystack',
         notes: formData.notes
       };
 
-      console.log('Sending order data:', orderData);
+      console.log('Order data prepared, initializing payment first...');
       
-      const response = await createOrder(orderData);
-      console.log('Order creation response:', response);
+      // Store order data temporarily and initialize payment
+      setCurrentOrder({ orderData }); // Store the order data, not a created order
       
-      // Clear cart and show success
-      clearCart();
-      setOrderId(response._id);
-      setOrderSuccess(true);
+      // Initialize Paystack payment directly
+      initializePaystackPaymentWithOrderData(orderData);
       
     } catch (error) {
-      console.error('Order submission error:', error);
-      console.error('Error details:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
-      
-      // Show more detailed error message
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to place order. Please try again.';
-      alert(`Order failed: ${errorMessage}`);
-    } finally {
+      console.error('Form submission error:', error);
+      alert('Failed to initialize payment. Please try again.');
       setIsSubmitting(false);
     }
   };
@@ -215,15 +536,23 @@ const Checkout = () => {
     );
   }
 
-  const subtotal = totalPrice;
-  const tax = totalPrice * 0.08;
-  const shipping = 0;
-  const total = subtotal + tax + shipping;
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-8">Checkout</h1>
+        
+        {/* Payment Step Indicator */}
+        {paymentStep === 'payment' && (
+          <div className="mb-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center space-x-3">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+              <div>
+                <h3 className="font-semibold text-blue-800">Payment in Progress</h3>
+                <p className="text-blue-600">Complete your payment in the Paystack popup to finish your order.</p>
+              </div>
+            </div>
+          </div>
+        )}
         
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Checkout Form */}
@@ -386,14 +715,16 @@ const Checkout = () => {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || paymentStep === 'payment'}
                 className={`w-full py-4 px-6 rounded-lg font-medium text-lg transition-colors duration-200 ${
-                  isSubmitting
+                  isSubmitting || paymentStep === 'payment'
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     : 'bg-blue-600 hover:bg-blue-700 text-white'
                 }`}
               >
-                {isSubmitting ? 'Processing Order...' : `Place Order - ₵${total.toFixed(2)}`}
+                {isSubmitting ? 'Processing Order...' : 
+                 paymentStep === 'payment' ? 'Payment in Progress...' : 
+                 `Continue to Payment - ₵${total.toFixed(2)}`}
               </button>
             </form>
           </div>
