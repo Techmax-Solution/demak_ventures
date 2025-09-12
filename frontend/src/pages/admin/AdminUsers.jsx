@@ -155,20 +155,20 @@ const AdminUsers = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Users</h1>
-            <p className="text-gray-600">Manage user accounts and permissions</p>
+        <div className="flex flex-col space-y-4 sm:flex-row sm:justify-between sm:items-center sm:space-y-0">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Users</h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-1">Manage user accounts and permissions</p>
           </div>
-          <div className="flex space-x-3">
-            <select className="input-field">
+          <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3 flex-shrink-0">
+            <select className="input-field text-sm">
               <option value="">All Roles</option>
               <option value="user">Users</option>
               <option value="admin">Admins</option>
             </select>
-            <select className="input-field">
+            <select className="input-field text-sm">
               <option value="">All Status</option>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>

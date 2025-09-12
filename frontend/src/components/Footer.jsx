@@ -148,12 +148,12 @@ const Footer = () => {
             
             {/* Copyright */}
             <div className="text-gray-600 text-sm">
-              © 2025 — ORIMA. All Rights Reserved.
+              © 2025 — Demak. All Rights Reserved.
             </div>
 
             {/* Brand Name */}
             <div className="text-center">
-              <h2 className="text-2xl font-light tracking-wider text-gray-900">ORIMA.</h2>
+              <h2 className="text-2xl font-light tracking-wider text-gray-900">Demak.</h2>
             </div>
 
             {/* Payment Icons */}

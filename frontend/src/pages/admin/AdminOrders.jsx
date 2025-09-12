@@ -161,15 +161,15 @@ const AdminOrders = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
-            <p className="text-gray-600">Manage customer orders and track deliveries</p>
+        <div className="flex flex-col space-y-4 sm:flex-row sm:justify-between sm:items-center sm:space-y-0">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Orders</h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-1">Manage customer orders and track deliveries</p>
           </div>
-          <div className="flex space-x-3">
-            <select className="input-field">
+          <div className="flex-shrink-0">
+            <select className="input-field text-sm w-full sm:w-auto">
               <option value="">All Statuses</option>
               {statusOptions.map(option => (
                 <option key={option.value} value={option.value}>

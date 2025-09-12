@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { AdminProvider } from './context/AdminContext';
+import { UserProvider } from './context/UserContext';
 import ScrollToTop from './components/ScrollToTop';
 import TopBanner from './components/TopBanner';
 import Navbar from './components/Navbar';
@@ -11,6 +12,8 @@ import ProductDetails from './pages/ProductDetails';
 import Dashboard from './pages/Dashboard';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
+import Login from './pages/Login';
+import Register from './pages/Register';
 
 // Admin components
 import AdminLogin from './pages/admin/AdminLogin';
@@ -23,11 +26,12 @@ import ProtectedAdminRoute from './components/admin/ProtectedAdminRoute';
 
 function App() {
   return (
-    <CartProvider>
-      <AdminProvider>
-        <Router>
-          <ScrollToTop />
-          <Routes>
+    <UserProvider>
+      <CartProvider>
+        <AdminProvider>
+          <Router>
+            <ScrollToTop />
+            <Routes>
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={
@@ -69,6 +73,8 @@ function App() {
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/cart" element={<Cart />} />
                     <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
                   </Routes>
                 </main>
                 <Footer />
@@ -76,8 +82,9 @@ function App() {
             } />
           </Routes>
         </Router>
-      </AdminProvider>
-    </CartProvider>
+        </AdminProvider>
+      </CartProvider>
+    </UserProvider>
   );
 }
 

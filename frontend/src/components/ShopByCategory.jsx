@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const ShopByCategory = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
 
   const categories = [
     {
@@ -14,7 +15,7 @@ const ShopByCategory = () => {
     {
       id: 2,
       name: "WOMEN'S",
-      image: "https://images.unsplash.com/photo-1494790108755-2616c9c1f01e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+      image: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
       link: "/shop?category=women"
     },
     {
@@ -31,12 +32,31 @@ const ShopByCategory = () => {
     }
   ];
 
+  // Check if mobile on mount and resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024); // lg breakpoint
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Get max slides based on screen size
+  const getMaxSlides = () => {
+    if (isMobile) {
+      return categories.length - 1; // Show 1 at a time on mobile
+    }
+    return Math.max(1, categories.length - 3); // Show 4 at a time on desktop
+  };
+
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % Math.max(1, categories.length - 3));
+    setCurrentIndex((prev) => (prev + 1) % (getMaxSlides() + 1));
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + Math.max(1, categories.length - 3)) % Math.max(1, categories.length - 3));
+    setCurrentIndex((prev) => (prev - 1 + (getMaxSlides() + 1)) % (getMaxSlides() + 1));
   };
 
   return (
@@ -47,35 +67,39 @@ const ShopByCategory = () => {
         <div className="flex items-center justify-between mb-12">
           <h2 className="text-3xl lg:text-4xl font-light text-gray-900">Shop By Category</h2>
           
-          {/* Navigation Arrows */}
-          <div className="flex items-center gap-4">
-            <button
-              onClick={prevSlide}
-              className="w-10 h-10 flex items-center justify-center border border-gray-300 hover:border-gray-400 transition-colors duration-200"
-              aria-label="Previous categories"
-            >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            
-            <button
-              onClick={nextSlide}
-              className="w-10 h-10 flex items-center justify-center border border-gray-300 hover:border-gray-400 transition-colors duration-200"
-              aria-label="Next categories"
-            >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
+          {/* Navigation Arrows - Only show on mobile */}
+          {isMobile && (
+            <div className="flex items-center gap-4">
+              <button
+                onClick={prevSlide}
+                className="w-10 h-10 flex items-center justify-center border border-gray-300 hover:border-gray-400 transition-colors duration-200"
+                aria-label="Previous categories"
+              >
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              
+              <button
+                onClick={nextSlide}
+                className="w-10 h-10 flex items-center justify-center border border-gray-300 hover:border-gray-400 transition-colors duration-200"
+                aria-label="Next categories"
+              >
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Categories Grid */}
         <div className="overflow-hidden">
           <div 
             className="flex transition-transform duration-500 ease-in-out"
-            style={{ transform: `translateX(-${currentIndex * 25}%)` }}
+            style={{ 
+              transform: isMobile ? `translateX(-${currentIndex * 100}%)` : 'translateX(0%)' 
+            }}
           >
             {categories.map((category) => (
               <div 
@@ -116,20 +140,22 @@ const ShopByCategory = () => {
           </div>
         </div>
 
-        {/* Category Indicators */}
-        <div className="flex justify-center items-center mt-8 gap-2">
-          {Array.from({ length: Math.max(1, categories.length - 3) }).map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentIndex(index)}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                index === currentIndex
-                  ? 'bg-gray-900 w-6'
-                  : 'bg-gray-300 hover:bg-gray-400'
-              }`}
-            />
-          ))}
-        </div>
+        {/* Category Indicators - Only show on mobile */}
+        {isMobile && (
+          <div className="flex justify-center items-center mt-8 gap-2">
+            {Array.from({ length: getMaxSlides() + 1 }).map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentIndex(index)}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  index === currentIndex
+                    ? 'bg-gray-900 w-6'
+                    : 'bg-gray-300 hover:bg-gray-400'
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

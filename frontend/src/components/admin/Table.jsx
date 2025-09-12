@@ -98,7 +98,7 @@ const Table = ({
   return (
     <div className="bg-white shadow rounded-lg overflow-hidden">
       {searchable && (
-        <div className="px-6 py-4 border-b border-gray-200">
+        <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
           <div className="relative">
             <input
               type="text"
@@ -116,7 +116,70 @@ const Table = ({
         </div>
       )}
 
-      <div className="overflow-x-auto">
+      {/* Mobile Card View */}
+      <div className="block sm:hidden">
+        {sortedData.length > 0 ? (
+          <div className="divide-y divide-gray-200">
+            {sortedData.map((item, index) => (
+              <div key={item._id || item.id || index} className="p-4 hover:bg-gray-50">
+                <div className="space-y-3">
+                  {columns.map((column) => {
+                    const content = renderCellContent(item, column);
+                    if (!content || content === '-') return null;
+                    
+                    return (
+                      <div key={column.key} className="flex justify-between items-start">
+                        <span className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+                          {column.title}:
+                        </span>
+                        <span className="text-sm text-gray-900 text-right ml-4 flex-1">
+                          {content}
+                        </span>
+                      </div>
+                    );
+                  })}
+                  
+                  {(onEdit || onDelete || onView) && (
+                    <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
+                      {onView && (
+                        <button
+                          onClick={() => onView(item)}
+                          className="inline-flex items-center px-3 py-1 border border-blue-300 text-xs font-medium rounded text-blue-700 bg-blue-50 hover:bg-blue-100"
+                        >
+                          View
+                        </button>
+                      )}
+                      {onEdit && (
+                        <button
+                          onClick={() => onEdit(item)}
+                          className="inline-flex items-center px-3 py-1 border border-indigo-300 text-xs font-medium rounded text-indigo-700 bg-indigo-50 hover:bg-indigo-100"
+                        >
+                          Edit
+                        </button>
+                      )}
+                      {onDelete && (
+                        <button
+                          onClick={() => onDelete(item)}
+                          className="inline-flex items-center px-3 py-1 border border-red-300 text-xs font-medium rounded text-red-700 bg-red-50 hover:bg-red-100"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="p-6 text-center text-gray-500">
+            No data available
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden sm:block overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>

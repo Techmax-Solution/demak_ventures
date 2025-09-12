@@ -10,6 +10,7 @@ const Shop = () => {
   const [loading, setLoading] = useState(true);
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showFilters, setShowFilters] = useState(false); // Mobile filter toggle
   const [availableFilters, setAvailableFilters] = useState({
     categories: [],
     colors: [],
@@ -272,7 +273,7 @@ const Shop = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="relative bg-gray-100 min-h-[200px]">
+      <div className="relative bg-gray-100 min-h-[150px] md:min-h-[200px]">
         {/* Background Image */}
         <div className="absolute inset-0">
           <img 
@@ -284,12 +285,12 @@ const Shop = () => {
         </div>
         
         {/* Content positioned over the image */}
-        <div className="relative z-10 flex items-center justify-center min-h-[200px] px-8">
+        <div className="relative z-10 flex items-center justify-center min-h-[150px] md:min-h-[200px] px-4 md:px-8">
           <div className="text-center">
             {/* Title with back arrow */}
-            <h1 className="text-5xl lg:text-6xl font-light text-gray-900 mb-4 tracking-wide flex items-center justify-center">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-gray-900 mb-2 md:mb-4 tracking-wide flex items-center justify-center">
               <span 
-                className="mr-4 cursor-pointer hover:text-gray-700 transition-colors"
+                className="mr-2 md:mr-4 cursor-pointer hover:text-gray-700 transition-colors text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
                 onClick={() => navigate(-1)}
               >
                 ←
@@ -299,7 +300,7 @@ const Shop = () => {
             
             {/* Breadcrumb */}
             <nav>
-              <div className="flex items-center justify-center space-x-2 text-sm text-gray-700 uppercase tracking-wide">
+              <div className="flex items-center justify-center space-x-1 md:space-x-2 text-xs md:text-sm text-gray-700 uppercase tracking-wide">
                 <span 
                   className="hover:text-gray-900 cursor-pointer transition-colors"
                   onClick={() => navigate('/')}
@@ -314,67 +315,99 @@ const Shop = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex gap-8">
+      <div className="container mx-auto px-4 py-4 md:py-8">
+        {/* Mobile Filter Toggle Button */}
+        <div className="lg:hidden mb-4">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center justify-center w-full py-3 px-4 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition-colors"
+          >
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+            Filters & Sort
+            <svg className={`w-4 h-4 ml-auto transition-transform ${showFilters ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
           {/* Left Sidebar - Filters */}
-          <div className="w-80 flex-shrink-0">
-            {/* Categories */}
-            <div className="mb-8">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Categories</h3>
-              <div className="space-y-2">
-                <label className="flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black" 
-                    checked={filters.categories.length === 0}
-                    onChange={(e) => handleCategoryChange('all', e.target.checked)}
-                  />
-                  <span className="ml-3 text-sm text-gray-700">All Categories</span>
-                </label>
+          <div className={`lg:w-80 lg:flex-shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}>
+            <div className="bg-white lg:bg-transparent rounded-lg lg:rounded-none p-4 lg:p-0 border lg:border-none shadow-sm lg:shadow-none">
+              {/* Sort Dropdown - Mobile First */}
+              <div className="mb-6 lg:hidden">
+                <h3 className="text-lg font-medium text-gray-900 mb-3">Sort By</h3>
+                <select 
+                  value={filters.sortBy}
+                  onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black text-base"
+                >
+                  <option value="name">Default Sorting</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                  <option value="newest">Newest First</option>
+                </select>
+              </div>
+
+              {/* Categories */}
+              <div className="mb-6 lg:mb-8">
+                <h3 className="text-lg font-medium text-gray-900 mb-3 lg:mb-4">Categories</h3>
+                <div className="space-y-2">
+                  <label className="flex items-center cursor-pointer p-2 -m-2 rounded hover:bg-gray-50">
+                    <input 
+                      type="checkbox" 
+                      className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black" 
+                      checked={filters.categories.length === 0}
+                      onChange={(e) => handleCategoryChange('all', e.target.checked)}
+                    />
+                    <span className="ml-3 text-sm text-gray-700">All Categories</span>
+                  </label>
                 {availableFilters.categories.map(category => {
                   const categoryCount = allProducts.filter(product => 
                     product.category?.toLowerCase() === category.toLowerCase()
                   ).length;
                   
-                  return (
-                    <label key={category} className="flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black" 
-                        checked={filters.categories.includes(category.toLowerCase())}
-                        onChange={(e) => handleCategoryChange(category, e.target.checked)}
-                  />
-                      <span className="ml-3 text-sm text-gray-700">
-                        {category.charAt(0).toUpperCase() + category.slice(1)} ({categoryCount})
-                      </span>
-                </label>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Price Range */}
-            <div className="mb-8">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Price</h3>
-              <div className="px-2">
-                <input 
-                  type="range" 
-                  min={availableFilters.priceRange.minPrice || 40} 
-                  max={availableFilters.priceRange.maxPrice || 210} 
-                  value={priceSliderValue[1]}
-                  onChange={handlePriceRangeChange}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                />
-                <div className="flex justify-between text-sm text-gray-600 mt-2">
-                  <span>Range: ₵{availableFilters.priceRange.minPrice || 40}.00 - ₵{priceSliderValue[1]}.00</span>
+                    return (
+                      <label key={category} className="flex items-center cursor-pointer p-2 -m-2 rounded hover:bg-gray-50">
+                        <input 
+                          type="checkbox" 
+                          className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black" 
+                          checked={filters.categories.includes(category.toLowerCase())}
+                          onChange={(e) => handleCategoryChange(category, e.target.checked)}
+                        />
+                        <span className="ml-3 text-sm text-gray-700">
+                          {category.charAt(0).toUpperCase() + category.slice(1)} ({categoryCount})
+                        </span>
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
-            </div>
 
-            {/* Color */}
-            <div className="mb-8">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Color</h3>
-              <div className="flex flex-wrap gap-2">
+              {/* Price Range */}
+              <div className="mb-6 lg:mb-8">
+                <h3 className="text-lg font-medium text-gray-900 mb-3 lg:mb-4">Price</h3>
+                <div className="px-2">
+                  <input 
+                    type="range" 
+                    min={availableFilters.priceRange.minPrice || 40} 
+                    max={availableFilters.priceRange.maxPrice || 210} 
+                    value={priceSliderValue[1]}
+                    onChange={handlePriceRangeChange}
+                    className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                  />
+                  <div className="flex justify-between text-xs lg:text-sm text-gray-600 mt-2">
+                    <span>Range: ₵{availableFilters.priceRange.minPrice || 40}.00 - ₵{priceSliderValue[1]}.00</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Color */}
+              <div className="mb-6 lg:mb-8">
+                <h3 className="text-lg font-medium text-gray-900 mb-3 lg:mb-4">Color</h3>
+                <div className="flex flex-wrap gap-2 lg:gap-3">
                 {availableFilters.colors.map(color => {
                   const getColorClass = (colorName) => {
                     const colorMap = {
@@ -396,38 +429,39 @@ const Shop = () => {
                   };
 
                   return (
-                    <div 
-                      key={color}
-                      className={`w-8 h-8 rounded-full border-2 cursor-pointer hover:border-gray-400 ${getColorClass(color)} ${
-                        filters.colors.includes(color.toLowerCase()) 
-                          ? (color.toLowerCase() === 'black' ? 'border-white ring-2 ring-gray-400' : 'border-black ring-2 ring-black')
-                          : 'border-gray-200'
-                      }`}
-                      onClick={() => handleColorChange(color.toLowerCase())}
-                      title={color.charAt(0).toUpperCase() + color.slice(1)}
-                ></div>
+                      <div 
+                        key={color}
+                        className={`w-9 h-9 lg:w-8 lg:h-8 rounded-full border-2 cursor-pointer hover:border-gray-400 transition-all ${getColorClass(color)} ${
+                          filters.colors.includes(color.toLowerCase()) 
+                            ? (color.toLowerCase() === 'black' ? 'border-white ring-2 ring-gray-400' : 'border-black ring-2 ring-black')
+                            : 'border-gray-200'
+                        }`}
+                        onClick={() => handleColorChange(color.toLowerCase())}
+                        title={color.charAt(0).toUpperCase() + color.slice(1)}
+                      ></div>
                   );
                 })}
               </div>
             </div>
 
-            {/* Size */}
-            <div className="mb-8">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Size</h3>
-              <div className="grid grid-cols-4 gap-2">
-                {availableFilters.sizes.map(size => (
-                  <button 
-                    key={size}
-                    className={`px-3 py-2 text-sm border rounded hover:border-gray-400 transition-colors ${
-                      filters.sizes.includes(size) 
-                        ? 'border-black bg-black text-white' 
-                        : 'border-gray-300 hover:border-gray-400'
-                    }`}
-                    onClick={() => handleSizeChange(size)}
-                  >
-                    {size}
-                  </button>
-                ))}
+              {/* Size */}
+              <div className="mb-6 lg:mb-8">
+                <h3 className="text-lg font-medium text-gray-900 mb-3 lg:mb-4">Size</h3>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  {availableFilters.sizes.map(size => (
+                    <button 
+                      key={size}
+                      className={`px-3 py-3 lg:py-2 text-sm border rounded hover:border-gray-400 transition-colors ${
+                        filters.sizes.includes(size) 
+                          ? 'border-black bg-black text-white' 
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                      onClick={() => handleSizeChange(size)}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -435,12 +469,12 @@ const Shop = () => {
           {/* Main Content */}
           <div className="flex-1">
             {/* Top Bar */}
-            <div className="flex items-center justify-between mb-6">
-              <p className="text-gray-600">Showing all {products.length} results</p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 lg:mb-6">
+              <p className="text-gray-600 text-sm lg:text-base">Showing all {products.length} results</p>
               
-              <div className="flex items-center gap-4">
-                {/* View Toggle */}
-                <div className="flex items-center border border-gray-300 rounded">
+              <div className="flex items-center justify-between sm:justify-end gap-3 lg:gap-4">
+                {/* View Toggle - Hidden on mobile */}
+                <div className="hidden sm:flex items-center border border-gray-300 rounded">
                   <button className="p-2 hover:bg-gray-100">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1zM3 16a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" />
@@ -453,49 +487,49 @@ const Shop = () => {
                   </button>
                 </div>
                 
-                {/* Sort Dropdown */}
-              <select 
-                value={filters.sortBy}
-                onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-md focus:ring-black focus:border-black"
-              >
+                {/* Sort Dropdown - Desktop Only */}
+                <select 
+                  value={filters.sortBy}
+                  onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                  className="hidden lg:block px-4 py-2 border border-gray-300 rounded-md focus:ring-black focus:border-black"
+                >
                   <option value="name">Default Sorting</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="newest">Newest First</option>
-              </select>
-          </div>
-        </div>
-
-        {/* Products Grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Loading Skeleton */}
-            {[...Array(6)].map((_, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-sm overflow-hidden animate-pulse">
-                <div className="aspect-square bg-gray-200"></div>
-                <div className="p-4 space-y-3">
-                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                  <div className="h-5 bg-gray-200 rounded w-3/4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-                </div>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                  <option value="newest">Newest First</option>
+                </select>
               </div>
-            ))}
-          </div>
-        ) : products.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600 text-lg">No products found matching your criteria.</p>
-          </div>
-        ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map(product => (
+            </div>
+
+            {/* Products Grid */}
+            {loading ? (
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+                {/* Loading Skeleton */}
+                {[...Array(6)].map((_, index) => (
+                  <div key={index} className="bg-white rounded-lg shadow-sm overflow-hidden animate-pulse">
+                    <div className="aspect-square bg-gray-200"></div>
+                    <div className="p-3 lg:p-4 space-y-2 lg:space-y-3">
+                      <div className="h-3 lg:h-4 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-4 lg:h-5 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-3 lg:h-4 bg-gray-200 rounded w-1/3"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : products.length === 0 ? (
+              <div className="text-center py-8 lg:py-12">
+                <p className="text-gray-600 text-base lg:text-lg">No products found matching your criteria.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+                {products.map(product => (
                   <div 
                     key={product._id} 
-                    className="group relative overflow-hidden transition-shadow cursor-pointer hover:shadow-lg"
+                    className="group relative overflow-hidden transition-shadow cursor-pointer hover:shadow-lg bg-white rounded-lg"
                     onClick={() => handleProductClick(product._id)}
                   >
                     {/* Product Image */}
-                    <div className="aspect-square bg-gray-100 relative overflow-hidden">
+                    <div className="aspect-square bg-gray-100 relative overflow-hidden rounded-t-lg">
                       <img 
                         src={
                           product.images?.[0]?.url || 
@@ -512,44 +546,44 @@ const Shop = () => {
                       
                       {/* Discount Badge */}
                       {product.discount && (
-                        <div className="absolute top-3 left-3 bg-black text-white px-2 py-1 text-xs rounded">
+                        <div className="absolute top-2 left-2 bg-black text-white px-1.5 py-0.5 text-xs rounded">
                           -{product.discount}%
                         </div>
                       )}
                       
                       {/* Hot Badge */}
                       {product.isHot && (
-                        <div className="absolute top-3 right-3 bg-red-500 text-white px-2 py-1 text-xs rounded">
+                        <div className="absolute top-2 right-2 bg-red-500 text-white px-1.5 py-0.5 text-xs rounded">
                           Hot
                         </div>
                       )}
                       
                       {/* Sale Badge */}
                       {product.onSale && (
-                        <div className="absolute top-3 right-3 bg-black text-white px-2 py-1 text-xs rounded">
+                        <div className="absolute top-2 right-2 bg-black text-white px-1.5 py-0.5 text-xs rounded">
                           22%
                         </div>
                       )}
                     </div>
                     
                     {/* Product Info */}
-                    <div className="p-4">
-                      <p className="text-sm text-gray-500 mb-1">{product.category || 'Accessory'}</p>
-                      <h3 className="font-medium text-gray-900 mb-2">{product.name}</h3>
-                      <div className="flex items-center gap-2">
+                    <div className="p-3 lg:p-4">
+                      <p className="text-xs lg:text-sm text-gray-500 mb-1 truncate">{product.category || 'Accessory'}</p>
+                      <h3 className="font-medium text-gray-900 mb-2 text-sm lg:text-base line-clamp-2 leading-tight">{product.name}</h3>
+                      <div className="flex items-center gap-1 lg:gap-2 flex-wrap">
                         {product.originalPrice && (
-                          <span className="text-gray-400 line-through text-sm">₵{product.originalPrice}</span>
+                          <span className="text-gray-400 line-through text-xs lg:text-sm">₵{product.originalPrice}</span>
                         )}
-                        <span className="text-gray-900 font-medium">₵{product.price}</span>
+                        <span className="text-gray-900 font-medium text-sm lg:text-base">₵{product.price}</span>
                         {product.priceRange && (
-                          <span className="text-gray-600">– ₵{product.maxPrice}</span>
+                          <span className="text-gray-600 text-xs lg:text-sm">– ₵{product.maxPrice}</span>
                         )}
                       </div>
                       
                       {/* Color Options */}
                       {product.colors && (
-                        <div className="flex gap-1 mt-3">
-                          {product.colors.map((color, index) => {
+                        <div className="flex gap-1 mt-2 lg:mt-3 overflow-x-auto">
+                          {product.colors.slice(0, 4).map((color, index) => {
                             // Helper function to get color hex codes
                             const getColorHex = (colorName) => {
                               const colorMap = {
@@ -591,7 +625,7 @@ const Shop = () => {
                             return (
                               <div 
                                 key={index}
-                                className={`w-6 h-6 rounded-full border-2 cursor-pointer ${
+                                className={`w-5 h-5 lg:w-6 lg:h-6 rounded-full border-2 cursor-pointer flex-shrink-0 ${
                                   colorName.toLowerCase() === 'white' ? 'border-gray-300' : 'border-gray-200'
                                 }`}
                                 style={{ backgroundColor }}
@@ -599,13 +633,18 @@ const Shop = () => {
                               ></div>
                             );
                           })}
+                          {product.colors.length > 4 && (
+                            <div className="w-5 h-5 lg:w-6 lg:h-6 rounded-full border-2 border-gray-200 bg-gray-100 flex items-center justify-center text-xs text-gray-600 flex-shrink-0">
+                              +{product.colors.length - 4}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
                   </div>
-            ))}
-          </div>
-        )}
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

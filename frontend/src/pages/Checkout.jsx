@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useUser } from '../context/UserContext';
 import { createOrder } from '../services/api';
 
 const Checkout = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { cartItems, totalPrice, clearCart } = useCart();
+  const { isAuthenticated, loading } = useUser();
   
   const [formData, setFormData] = useState({
     // Shipping Information
@@ -34,12 +37,22 @@ const Checkout = () => {
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderId, setOrderId] = useState(null);
 
-  // Redirect if cart is empty
+  // Redirect if cart is empty or user is not authenticated
   useEffect(() => {
     if (cartItems.length === 0 && !orderSuccess) {
       navigate('/cart');
     }
   }, [cartItems, navigate, orderSuccess]);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      navigate('/login', { 
+        state: { from: location },
+        replace: true 
+      });
+    }
+  }, [isAuthenticated, loading, navigate, location]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -71,13 +84,8 @@ const Checkout = () => {
     if (!formData.state.trim()) newErrors.state = 'State is required';
     if (!formData.zipCode.trim()) newErrors.zipCode = 'ZIP code is required';
 
-    // Payment validation (simplified - in real app you'd use Stripe/payment processor)
-    if (!formData.cardNumber.trim()) newErrors.cardNumber = 'Card number is required';
-    else if (formData.cardNumber.replace(/\s/g, '').length < 16) newErrors.cardNumber = 'Card number is invalid';
-    if (!formData.expiryDate.trim()) newErrors.expiryDate = 'Expiry date is required';
-    if (!formData.cvv.trim()) newErrors.cvv = 'CVV is required';
-    else if (formData.cvv.length < 3) newErrors.cvv = 'CVV is invalid';
-    if (!formData.cardName.trim()) newErrors.cardName = 'Cardholder name is required';
+    // Note: Payment validation removed since payment form is not present
+    // In a real app, you would integrate with a payment processor
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -86,45 +94,43 @@ const Checkout = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    console.log('Form submission started...');
+    
     if (!validateForm()) {
+      console.log('Form validation failed');
       return;
     }
 
+    console.log('Form validation passed');
     setIsSubmitting(true);
 
     try {
-      // Prepare order data for backend
+      // Prepare order data for backend to match Order model
       const orderData = {
-        items: cartItems.map(item => ({
+        orderItems: cartItems.map(item => ({
           product: item.product._id,
-          quantity: item.quantity,
+          name: item.product.name,
+          image: item.product.images?.[0]?.url || '',
           price: item.price,
+          quantity: item.quantity,
           size: item.size,
           color: item.color
         })),
         shippingAddress: {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
           street: formData.address,
           city: formData.city,
           state: formData.state,
           zipCode: formData.zipCode,
-          country: formData.country,
-          phone: formData.phone
+          country: formData.country
         },
-        paymentInfo: {
-          method: 'credit_card',
-          // In real app, payment would be processed securely server-side
-          cardLast4: formData.cardNumber.slice(-4)
-        },
-        subtotal: totalPrice,
-        tax: totalPrice * 0.08,
-        shipping: 0,
-        total: totalPrice + (totalPrice * 0.08),
+        paymentMethod: 'Credit Card',
         notes: formData.notes
       };
 
+      console.log('Sending order data:', orderData);
+      
       const response = await createOrder(orderData);
+      console.log('Order creation response:', response);
       
       // Clear cart and show success
       clearCart();
@@ -133,7 +139,15 @@ const Checkout = () => {
       
     } catch (error) {
       console.error('Order submission error:', error);
-      alert('Failed to place order. Please try again.');
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      
+      // Show more detailed error message
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to place order. Please try again.';
+      alert(`Order failed: ${errorMessage}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -184,6 +198,18 @@ const Checkout = () => {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
     );
@@ -342,81 +368,7 @@ const Checkout = () => {
                 </div>
               </div>
 
-              {/* Payment Information */}
-              <div className="card p-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">Payment Information</h2>
-                
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Card Number *
-                    </label>
-                    <input
-                      type="text"
-                      name="cardNumber"
-                      value={formData.cardNumber}
-                      onChange={handleInputChange}
-                      placeholder="1234 5678 9012 3456"
-                      className={`input-field ${errors.cardNumber ? 'border-red-500' : ''}`}
-                    />
-                    {errors.cardNumber && (
-                      <p className="text-red-500 text-sm mt-1">{errors.cardNumber}</p>
-                    )}
-                  </div>
-                  
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Expiry Date *
-                      </label>
-                      <input
-                        type="text"
-                        name="expiryDate"
-                        value={formData.expiryDate}
-                        onChange={handleInputChange}
-                        placeholder="MM/YY"
-                        className={`input-field ${errors.expiryDate ? 'border-red-500' : ''}`}
-                      />
-                      {errors.expiryDate && (
-                        <p className="text-red-500 text-sm mt-1">{errors.expiryDate}</p>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        CVV *
-                      </label>
-                      <input
-                        type="text"
-                        name="cvv"
-                        value={formData.cvv}
-                        onChange={handleInputChange}
-                        placeholder="123"
-                        className={`input-field ${errors.cvv ? 'border-red-500' : ''}`}
-                      />
-                      {errors.cvv && (
-                        <p className="text-red-500 text-sm mt-1">{errors.cvv}</p>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Cardholder Name *
-                      </label>
-                      <input
-                        type="text"
-                        name="cardName"
-                        value={formData.cardName}
-                        onChange={handleInputChange}
-                        className={`input-field ${errors.cardName ? 'border-red-500' : ''}`}
-                      />
-                      {errors.cardName && (
-                        <p className="text-red-500 text-sm mt-1">{errors.cardName}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
+       
 
               {/* Order Notes */}
               <div className="card p-6">

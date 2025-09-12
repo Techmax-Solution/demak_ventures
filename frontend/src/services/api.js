@@ -29,10 +29,13 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response?.status === 401) {
-      // Token expired or invalid
+    // Only handle 401 errors for non-auth profile requests to avoid conflicts
+    // Let the UserContext handle auth-related 401 errors properly
+    if (error.response?.status === 401 && !error.config?.url?.includes('/auth/profile')) {
+      // Token expired or invalid for non-profile requests
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      localStorage.removeItem('loginExpiry');
       window.location.href = '/login';
     }
     return Promise.reject(error);
@@ -47,7 +50,7 @@ export const authAPI = {
   },
 
   register: async (userData) => {
-    const response = await api.post('/auth/register', userData);
+    const response = await api.post('/auth/signup', userData);
     return response.data;
   },
 
@@ -171,8 +174,8 @@ export const getProductFilters = async () => {
 // Orders API calls
 export const getUserOrders = async () => {
   try {
-    const response = await api.get('/orders');
-    return response.data;
+    const response = await api.get('/orders/myorders');
+    return response.data.orders || response.data; // Handle both response formats
   } catch (error) {
     console.error('Error fetching orders:', error);
     throw error;

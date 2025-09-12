@@ -46,16 +46,16 @@ const OrderCard = ({ order }) => {
 
       {/* Order Items */}
       <div className="space-y-3 mb-4">
-        {order.items?.map((item, index) => (
+        {order.orderItems?.map((item, index) => (
           <div key={index} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
             <img 
-              src={item.product?.imageUrl || '/api/placeholder/60/60'} 
-              alt={item.product?.name || 'Product'}
+              src={item.image || item.product?.images?.[0] || '/api/placeholder/60/60'} 
+              alt={item.name || item.product?.name || 'Product'}
               className="w-12 h-12 object-cover rounded"
             />
             <div className="flex-1">
               <h4 className="font-medium text-gray-800">
-                {item.product?.name || 'Product Name'}
+                {item.name || item.product?.name || 'Product Name'}
               </h4>
               <div className="flex items-center space-x-4 text-sm text-gray-600">
                 <span>Qty: {item.quantity}</span>
@@ -64,7 +64,7 @@ const OrderCard = ({ order }) => {
               </div>
             </div>
             <div className="text-right">
-              <p className="font-medium text-gray-800">₵{item.price}</p>
+              <p className="font-medium text-gray-800">₵{item.price?.toFixed(2)}</p>
               <p className="text-sm text-gray-600">
                 ₵{(item.price * item.quantity).toFixed(2)}
               </p>
@@ -83,21 +83,27 @@ const OrderCard = ({ order }) => {
           <span className="text-gray-600">Subtotal:</span>
           <span className="text-gray-800">₵{order.subtotal?.toFixed(2) || '0.00'}</span>
         </div>
-        {order.shipping && (
+        {order.shippingPrice && (
           <div className="flex justify-between items-center mb-2">
             <span className="text-gray-600">Shipping:</span>
-            <span className="text-gray-800">₵{order.shipping.toFixed(2)}</span>
+            <span className="text-gray-800">₵{order.shippingPrice.toFixed(2)}</span>
           </div>
         )}
-        {order.tax && (
+        {order.taxPrice && (
           <div className="flex justify-between items-center mb-2">
             <span className="text-gray-600">Tax:</span>
-            <span className="text-gray-800">₵{order.tax.toFixed(2)}</span>
+            <span className="text-gray-800">₵{order.taxPrice.toFixed(2)}</span>
+          </div>
+        )}
+        {order.discount && (
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-gray-600">Discount:</span>
+            <span className="text-green-600">-₵{order.discount.toFixed(2)}</span>
           </div>
         )}
         <div className="flex justify-between items-center font-semibold text-lg border-t border-gray-200 pt-2">
           <span className="text-gray-800">Total:</span>
-          <span className="text-gray-800">₵{order.total?.toFixed(2) || '0.00'}</span>
+          <span className="text-gray-800">₵{order.totalPrice?.toFixed(2) || '0.00'}</span>
         </div>
       </div>
 
@@ -111,6 +117,9 @@ const OrderCard = ({ order }) => {
               {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}
             </p>
             <p>{order.shippingAddress.country}</p>
+            {order.shippingAddress.phone && (
+              <p className="mt-1">Phone: {order.shippingAddress.phone}</p>
+            )}
           </div>
         </div>
       )}

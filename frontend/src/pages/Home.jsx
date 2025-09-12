@@ -69,7 +69,7 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className={`relative h-[600px] bg-gradient-to-br ${currentSlideData.bgColor} overflow-hidden transition-all duration-700 ease-in-out`}>
+      <section className={`relative h-[600px] md:h-[600px] bg-gradient-to-br ${currentSlideData.bgColor} overflow-hidden transition-all duration-700 ease-in-out`}>
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.3),transparent_70%)]"></div>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(120,119,198,0.2),transparent_70%)]"></div>
@@ -92,7 +92,7 @@ const Home = () => {
                   </h1>
                 </div>
                 
-                <div className="pt-4">
+                <div className="">
                   <Link 
                     to="/shop" 
                     className="group inline-flex items-center space-x-2 text-white border-b border-white pb-1 hover:border-slate-300 transition-colors duration-300"
