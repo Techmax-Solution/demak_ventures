@@ -21,9 +21,9 @@ router.get('/:id', protect, getOrderById);
 router.put('/:id/pay', protect, updateOrderToPaid);
 router.put('/:id/cancel', protect, cancelOrder);
 
-// Admin routes
-router.get('/', protect, admin, getOrders);
+// Admin routes (specific routes before parameterized ones)
 router.get('/stats', protect, admin, getOrderStats);
+router.get('/', protect, admin, getOrders);
 router.put('/:id/deliver', protect, admin, updateOrderToDelivered);
 router.put('/:id/status', protect, admin, updateOrderStatus);
 

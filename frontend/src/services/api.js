@@ -29,15 +29,15 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Only handle 401 errors for non-auth profile requests to avoid conflicts
-    // Let the UserContext handle auth-related 401 errors properly
-    if (error.response?.status === 401 && !error.config?.url?.includes('/auth/profile')) {
-      // Token expired or invalid for non-profile requests
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('loginExpiry');
-      window.location.href = '/login';
+    // Let the UserContext handle all auth-related 401 errors
+    // Only handle 401s for very specific non-auth endpoints if needed
+    // This prevents conflicts with UserContext auth management
+    
+    // Log the error for debugging but don't automatically redirect
+    if (error.response?.status === 401) {
+      console.log('API request received 401, letting UserContext handle it');
     }
+    
     return Promise.reject(error);
   }
 );

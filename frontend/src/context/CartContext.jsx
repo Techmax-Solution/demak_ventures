@@ -1,4 +1,5 @@
 import { createContext, useContext, useReducer, useEffect } from 'react';
+import SessionManager from '../utils/sessionManager.js';
 
 const CartContext = createContext();
 
@@ -129,20 +130,21 @@ export const CartProvider = ({ children }) => {
 
   // Load cart from localStorage on mount
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      try {
-        const parsedCart = JSON.parse(savedCart);
-        dispatch({ type: CART_ACTIONS.LOAD_CART, payload: parsedCart });
-      } catch (error) {
-        console.error('Error loading cart from localStorage:', error);
-      }
+    console.log('Loading cart from localStorage using SessionManager...');
+    const savedCart = SessionManager.loadCart();
+    if (savedCart && (savedCart.items?.length > 0 || savedCart.totalItems > 0)) {
+      console.log('Cart loaded successfully:', savedCart);
+      dispatch({ type: CART_ACTIONS.LOAD_CART, payload: savedCart });
     }
   }, []);
 
-  // Save cart to localStorage whenever state changes
+  // Save cart to localStorage whenever state changes (using SessionManager)
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(state));
+    // Only save if cart has been initialized (avoid saving empty initial state)
+    if (state.items.length > 0 || state.totalItems > 0) {
+      SessionManager.saveCart(state);
+      console.log('Cart saved to localStorage:', state);
+    }
   }, [state]);
 
   // Cart actions
@@ -169,6 +171,8 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = () => {
     dispatch({ type: CART_ACTIONS.CLEAR_CART });
+    // Also clear from SessionManager
+    SessionManager.clearCart();
   };
 
   const getItemQuantity = (productId, size, color) => {

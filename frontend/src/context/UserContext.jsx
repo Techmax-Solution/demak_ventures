@@ -1,5 +1,7 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { authAPI } from '../services/api.js';
+import SessionManager from '../utils/sessionManager.js';
+import { debugAuth } from '../utils/debugAuth.js';
 
 const UserContext = createContext();
 
@@ -15,148 +17,281 @@ export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [authChecked, setAuthChecked] = useState(false);
+  const [initialized, setInitialized] = useState(false);
+  const initializingRef = useRef(false);
+  const stateChangeCountRef = useRef(0);
 
-  // Check if user is logged in on mount
+  // Wrapper for setUser to track all changes
+  const setUserWithTracking = (newUser, reason = 'unknown') => {
+    console.log(`👤 Setting user (${reason}):`, {
+      from: user ? (user.name || user.email) : 'null',
+      to: newUser ? (newUser.name || newUser.email) : 'null',
+      stack: new Error().stack.split('\n')[2]?.trim()
+    });
+    setUser(newUser);
+  };
+
+  // Track user state changes to detect unexpected resets
   useEffect(() => {
-    if (!authChecked) {
-      checkAuth();
+    stateChangeCountRef.current += 1;
+    console.log(`🔄 User state changed (#${stateChangeCountRef.current}):`, {
+      user: user ? (user.name || user.email) : 'null',
+      isAuthenticated,
+      loading,
+      initialized
+    });
+    
+    // Alert if user is unexpectedly cleared
+    if (stateChangeCountRef.current > 2 && !user && !loading) {
+      console.error('🚨 ALERT: User state was cleared unexpectedly!');
+      debugAuth();
     }
-  }, [authChecked]);
+  }, [user, isAuthenticated, loading, initialized]);
 
-  const checkAuth = async () => {
-    try {
-      setAuthChecked(true);
-      const token = localStorage.getItem('token');
-      const loginExpiry = localStorage.getItem('loginExpiry');
-      const storedUser = localStorage.getItem('user');
-      
-      if (!token || !loginExpiry) {
-        setLoading(false);
-        return;
+  // Initialize authentication on mount - always run on page load
+  useEffect(() => {
+    let isMounted = true;
+    
+    const runInitialization = async () => {
+      if (isMounted) {
+        console.log('🏁 Component mounted, starting auth initialization...');
+        // Reset flags to ensure fresh initialization on every page load
+        setInitialized(false);
+        initializingRef.current = false;
+        await initializeAuth();
       }
+    };
+    
+    runInitialization();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
-      // Check if login has expired
-      const currentTime = new Date().getTime();
-      if (currentTime > parseInt(loginExpiry)) {
-        // Login has expired, clear storage
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('loginExpiry');
-        setUser(null);
+  // Listen for storage changes to sync auth state across tabs
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'token' || e.key === 'user' || e.key === 'user_backup' || e.key === 'loginExpiry' || e.key === 'sessionId') {
+        console.log('🔄 Auth storage changed in another tab, refreshing auth state');
+        console.log('📋 Storage change details:', { key: e.key, oldValue: e.oldValue, newValue: e.newValue });
+        setInitialized(false);
+        initializingRef.current = false;
+        initializeAuth();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  // Periodic check to ensure session persistence (every 10 seconds for debugging)
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      if (isAuthenticated && user) {
+        const sessionData = SessionManager.loadUserSession();
+        if (!sessionData) {
+          console.error('🚨 CRITICAL: Session data lost unexpectedly!');
+          debugAuth();
+          // Try to restore from backup or re-initialize
+          setInitialized(false);
+          initializingRef.current = false;
+          initializeAuth();
+        } else {
+          console.log('✅ Session check passed - user still authenticated:', user.name || user.email);
+        }
+      } else if (isAuthenticated && !user) {
+        console.error('🚨 INCONSISTENT STATE: isAuthenticated=true but user=null');
+        debugAuth();
+      }
+    }, 10000); // Check every 10 seconds for debugging
+
+    return () => clearInterval(intervalId);
+  }, [isAuthenticated, user]);
+
+  const initializeAuth = async () => {
+    // Prevent concurrent execution but allow re-initialization
+    if (initializingRef.current) {
+      console.log('🔄 Auth initialization already in progress, skipping...');
+      return;
+    }
+
+    console.log('🚀 Initializing authentication...');
+    console.log('📊 Current state - User:', !!user, 'Authenticated:', isAuthenticated, 'Loading:', loading, 'Initialized:', initialized);
+    debugAuth(); // Debug localStorage contents
+    
+    // Set flag to prevent concurrent execution
+    initializingRef.current = true;
+    
+    try {
+      // Use SessionManager to load session data
+      const sessionData = SessionManager.loadUserSession();
+      
+      if (!sessionData) {
+        console.log('❌ No valid session found');
+        setUserWithTracking(null, 'no-session-data');
         setIsAuthenticated(false);
         setLoading(false);
+        setInitialized(true);
         return;
       }
 
-      // If we have a stored user and token is not expired, use it first
-      if (storedUser) {
-        try {
-          const parsedUser = JSON.parse(storedUser);
-          setUser(parsedUser);
-          setIsAuthenticated(true);
-        } catch (e) {
-          console.error('Error parsing stored user data:', e);
-        }
-      }
+      console.log('✅ Valid session found, restoring user:', sessionData.user.email || sessionData.user.name);
+      console.log('📋 Session data:', sessionData);
+      
+      // Immediately restore user state from valid session
+      console.log('🔄 Setting user state...', {
+        userBefore: !!user,
+        authenticatedBefore: isAuthenticated,
+        loadingBefore: loading,
+        userToSet: sessionData.user.name || sessionData.user.email
+      });
+      
+      setUserWithTracking(sessionData.user, 'session-restore');
+      setIsAuthenticated(true);
+      setLoading(false);
+      setInitialized(true);
+      
+      console.log('✅ User state updated - User:', !!sessionData.user, 'Authenticated: true, Loading: false');
+      
+      // Verify the state was actually set (async state updates)
+      setTimeout(() => {
+        console.log('🔍 State verification after 100ms:', {
+          user: !!user,
+          isAuthenticated,
+          loading,
+          userName: user?.name || user?.email || 'NO_USER'
+        });
+      }, 100);
 
-      // Then verify with server (but don't block UI)
-      try {
-        const userData = await authAPI.getProfile();
-        if (userData) {
-          setUser(userData);
-          setIsAuthenticated(true);
-          // Update stored user data if different
-          localStorage.setItem('user', JSON.stringify(userData));
-        } else {
-          // Clear invalid token
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          localStorage.removeItem('loginExpiry');
-          setUser(null);
-          setIsAuthenticated(false);
-        }
-      } catch (error) {
-        // If profile request fails but token is not expired, keep user logged in
-        // Only log out if it's a clear authentication failure
-        if (error.response?.status === 401) {
-          console.error('Auth check failed - token invalid:', error);
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          localStorage.removeItem('loginExpiry');
-          setUser(null);
-          setIsAuthenticated(false);
-        } else {
-          // Network error or other issue - keep user logged in with stored data
-          console.warn('Auth check failed but keeping user logged in:', error);
-        }
+      // Verify with server in background (don't change state on network errors)
+      // Temporarily disabled to test if this is causing the logout
+      // verifyWithServer();
+      
+    } catch (error) {
+      console.error('❌ Auth initialization failed:', error);
+      setUserWithTracking(null, 'initialization-error');
+      setIsAuthenticated(false);
+      setLoading(false);
+      setInitialized(true);
+    } finally {
+      initializingRef.current = false;
+    }
+  };
+
+  const verifyWithServer = async () => {
+    try {
+      console.log('🔄 Verifying session with server...');
+      const userData = await authAPI.getProfile();
+      
+      if (userData) {
+        console.log('✅ Server verification successful, user data:', userData);
+        setUserWithTracking(userData, 'server-verification');
+        setIsAuthenticated(true);
+        // Update stored user data
+        SessionManager.saveData(SessionManager.KEYS.USER, userData);
+      } else {
+        console.log('❌ Server says no user, clearing session');
+        clearSession();
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('loginExpiry');
-      setUser(null);
-      setIsAuthenticated(false);
-    } finally {
-      setLoading(false);
+      console.error('🚨 Server verification error details:', {
+        status: error.response?.status,
+        message: error.message,
+        data: error.response?.data
+      });
+      
+      // Only log out on explicit auth errors, not network errors
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        console.error('❌ Server rejected token, clearing session:', error.response.status);
+        clearSession();
+      } else {
+        console.warn('⚠️ Server verification failed (network/server error), keeping user logged in:', error.message);
+        // Keep user logged in with stored data on network errors
+      }
     }
+  };
+
+  const clearSession = () => {
+    console.log('🧹 Clearing user session');
+    SessionManager.clearUserSession();
+    setUserWithTracking(null, 'clear-session');
+    setIsAuthenticated(false);
+    setInitialized(false);
   };
 
   const login = async (credentials) => {
     try {
+      console.log('🔐 Logging in user...');
       const response = await authAPI.login(credentials);
       
-      // Set expiration time to 3 days from now
-      const expirationTime = new Date().getTime() + (3 * 24 * 60 * 60 * 1000); // 3 days in milliseconds
+      // Set expiration time to 7 days from now (longer persistence)
+      const expirationTime = new Date().getTime() + (7 * 24 * 60 * 60 * 1000); // 7 days in milliseconds
       
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(response));
-      localStorage.setItem('loginExpiry', expirationTime.toString());
+      console.log('✅ Login successful, storing comprehensive auth data');
+      // Use SessionManager for comprehensive data storage
+      SessionManager.saveUserSession(response, response.token, expirationTime);
       
-      setUser(response);
+      setUserWithTracking(response, 'login-success');
       setIsAuthenticated(true);
+      setLoading(false);
+      setInitialized(true);
       
       return response;
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error('❌ Login failed:', error);
       throw error;
     }
   };
 
   const register = async (userData) => {
     try {
+      console.log('📝 Registering user...');
       const response = await authAPI.register(userData);
       
-      // Set expiration time to 3 days from now
-      const expirationTime = new Date().getTime() + (3 * 24 * 60 * 60 * 1000); // 3 days in milliseconds
+      // Set expiration time to 7 days from now (longer persistence)
+      const expirationTime = new Date().getTime() + (7 * 24 * 60 * 60 * 1000); // 7 days in milliseconds
       
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(response));
-      localStorage.setItem('loginExpiry', expirationTime.toString());
+      console.log('✅ Registration successful, storing comprehensive auth data');
+      // Use SessionManager for comprehensive data storage
+      SessionManager.saveUserSession(response, response.token, expirationTime);
       
-      setUser(response);
+      setUserWithTracking(response, 'register-success');
       setIsAuthenticated(true);
+      setLoading(false);
+      setInitialized(true);
       
       return response;
     } catch (error) {
-      console.error('Registration failed:', error);
+      console.error('❌ Registration failed:', error);
       throw error;
     }
   };
 
   const logout = async () => {
     try {
+      console.log('🚪 Logging out user...');
       await authAPI.logout();
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('⚠️ Logout error:', error);
     } finally {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('loginExpiry');
-      setUser(null);
-      setIsAuthenticated(false);
+      clearSession();
+      setLoading(false);
     }
+  };
+
+  // Manual refresh function for components that need to re-check auth
+  const refreshAuth = async () => {
+    console.log('🔄 Manually refreshing auth...');
+    setInitialized(false);
+    initializingRef.current = false;
+    await initializeAuth();
+  };
+
+  // Force re-check auth (useful for debugging)
+  const checkAuth = async () => {
+    console.log('🔍 Force checking auth...');
+    await verifyWithServer();
   };
 
   const value = {
@@ -166,7 +301,8 @@ export const UserProvider = ({ children }) => {
     login,
     register,
     logout,
-    checkAuth
+    checkAuth,
+    refreshAuth
   };
 
   return (

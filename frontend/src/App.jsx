@@ -23,6 +23,7 @@ import AdminCategories from './pages/admin/AdminCategories';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminUsers from './pages/admin/AdminUsers';
 import ProtectedAdminRoute from './components/admin/ProtectedAdminRoute';
+import SessionDebugger from './components/SessionDebugger';
 
 function App() {
   return (
@@ -81,6 +82,7 @@ function App() {
               </div>
             } />
           </Routes>
+          <SessionDebugger />
         </Router>
         </AdminProvider>
       </CartProvider>
