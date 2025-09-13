@@ -17,7 +17,7 @@ const ImageUpload = ({ onUpload, multiple = false, className = '' }) => {
           try {
             const response = await adminApi.products.uploadImage(file);
             return {
-              url: `http://localhost:5000${response.url}`,
+              url: `${import.meta.env.VITE_API_BASE_URL}${response.url}`,
               alt: file.name.split('.')[0]
             };
           } catch (error) {
@@ -37,7 +37,7 @@ const ImageUpload = ({ onUpload, multiple = false, className = '' }) => {
         const file = files[0];
         const response = await adminApi.products.uploadImage(file);
         onUpload({
-          url: `http://localhost:5000${response.url}`,
+          url: `${import.meta.env.VITE_API_BASE_URL}${response.url}`,
           alt: file.name.split('.')[0]
         });
       }
