@@ -4,7 +4,7 @@ import SessionManager from '../utils/sessionManager.js';
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1',
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 30000, // Increased timeout to 30 seconds for remote server
   headers: {
     'Content-Type': 'application/json',

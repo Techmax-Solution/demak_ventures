@@ -24,19 +24,19 @@ export const fixImageUrl = (imageUrl) => {
   
   // If it starts with /uploads, prepend the base URL
   if (imageUrl.startsWith('/uploads/')) {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
+    const baseUrl = import.meta.env.VITE_API_BASE_URL;
     return baseUrl.replace('/api/v1', '') + imageUrl;
   }
   
   // If it's a relative path, assume it's an upload
   if (imageUrl.startsWith('/')) {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
+    const baseUrl = import.meta.env.VITE_API_BASE_URL;
     return baseUrl.replace('/api/v1', '') + imageUrl;
   }
   
   // If it's just a filename, assume it's in uploads
   if (!imageUrl.includes('/')) {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
+    const baseUrl = import.meta.env.VITE_API_BASE_URL ;
     return baseUrl.replace('/api/v1', '') + '/uploads/' + imageUrl;
   }
   

@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import connectDB from '../config/database.js';
 import Product from '../models/Product.js';
 import User from '../models/User.js';
+import Category from '../models/Category.js';
 
 dotenv.config();
 
@@ -12,7 +13,7 @@ const sampleProducts = [
         description: "A comfortable, breathable cotton t-shirt perfect for everyday wear. Made from 100% organic cotton with a relaxed fit.",
         price: 24.99,
         originalPrice: 29.99,
-        category: "men",
+        categoryName: "Men", // Will be converted to ObjectId
         subcategory: "t-shirts",
         brand: "ComfortWear",
         sizes: [
@@ -40,7 +41,7 @@ const sampleProducts = [
         description: "Stylish skinny jeans made from premium denim with stretch for comfort and mobility. Features a modern cut and classic five-pocket design.",
         price: 79.99,
         originalPrice: 99.99,
-        category: "women",
+        categoryName: "Women", // Will be converted to ObjectId
         subcategory: "jeans",
         brand: "DenimCo",
         sizes: [
@@ -67,7 +68,7 @@ const sampleProducts = [
         name: "Wool Blend Sweater",
         description: "Cozy wool blend sweater perfect for cooler weather. Features a classic crew neck design with ribbed cuffs and hem.",
         price: 89.99,
-        category: "women",
+        categoryName: "Women", // Will be converted to ObjectId
         subcategory: "sweaters",
         brand: "WarmWear",
         sizes: [
@@ -95,7 +96,7 @@ const sampleProducts = [
         name: "Running Sneakers",
         description: "High-performance running sneakers with advanced cushioning and breathable mesh upper. Perfect for daily runs and workouts.",
         price: 129.99,
-        category: "shoes",
+        categoryName: "Shoes", // Will be converted to ObjectId
         subcategory: "athletic",
         brand: "SportMax",
         sizes: [
@@ -123,7 +124,7 @@ const sampleProducts = [
         name: "Kids Rainbow Hoodie",
         description: "Fun and colorful hoodie for kids featuring a rainbow design. Made from soft cotton blend for all-day comfort.",
         price: 34.99,
-        category: "kids",
+        categoryName: "Kids", // Will be converted to ObjectId
         subcategory: "hoodies",
         brand: "KidStyle",
         sizes: [
@@ -149,7 +150,7 @@ const sampleProducts = [
         description: "Elegant leather crossbody bag perfect for everyday use. Features multiple compartments and an adjustable strap.",
         price: 149.99,
         originalPrice: 199.99,
-        category: "bags",
+        categoryName: "Bags", // Will be converted to ObjectId
         subcategory: "crossbody",
         brand: "LeatherCraft",
         sizes: [
@@ -214,20 +215,52 @@ const seedDatabase = async () => {
         await Product.deleteMany({});
         await User.deleteMany({});
         
-        // Create users
+        // Create users first
         console.log('👥 Creating sample users...');
         const createdUsers = await User.create(sampleUsers);
         console.log(`✅ Created ${createdUsers.length} users`);
         
-        // Create products
+        // Get or create categories
+        console.log('📂 Setting up categories...');
+        const categories = await Category.find({});
+        if (categories.length === 0) {
+            console.log('Creating categories...');
+            const categoryData = [
+                { name: 'Men', description: 'Men\'s clothing and accessories', sortOrder: 1 },
+                { name: 'Women', description: 'Women\'s clothing and accessories', sortOrder: 2 },
+                { name: 'Kids', description: 'Children\'s clothing and accessories', sortOrder: 3 },
+                { name: 'Shoes', description: 'Footwear for all occasions', sortOrder: 4 },
+                { name: 'Bags', description: 'Handbags, backpacks, and luggage', sortOrder: 5 }
+            ];
+            await Category.create(categoryData);
+            console.log('✅ Categories created');
+        }
+        
+        // Get category references
+        const categoryMap = {};
+        const allCategories = await Category.find({});
+        allCategories.forEach(cat => {
+            categoryMap[cat.name] = cat._id;
+        });
+        
+        // Create products with proper category references
         console.log('📦 Creating sample products...');
-        const createdProducts = await Product.create(sampleProducts);
+        const productsWithCategories = sampleProducts.map(product => {
+            const { categoryName, ...productData } = product;
+            return {
+                ...productData,
+                category: categoryMap[categoryName]
+            };
+        });
+        
+        const createdProducts = await Product.create(productsWithCategories);
         console.log(`✅ Created ${createdProducts.length} products`);
         
         console.log('🎉 Database seeding completed successfully!');
         console.log('\n📊 Seeded Data Summary:');
         console.log(`   👥 Users: ${createdUsers.length}`);
         console.log(`   📦 Products: ${createdProducts.length}`);
+        console.log(`   📂 Categories: ${allCategories.length}`);
         
         console.log('\n🔐 Sample Login Credentials:');
         console.log('   Admin: john@example.com / password123');
