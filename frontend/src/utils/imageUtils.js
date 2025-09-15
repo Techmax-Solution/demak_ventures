@@ -36,7 +36,7 @@ export const fixImageUrl = (imageUrl) => {
   
   // If it's just a filename, assume it's in uploads
   if (!imageUrl.includes('/')) {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL ;
+    const baseUrl = import.meta.env.VITE_API_BASE_URL;
     return baseUrl.replace('/api/v1', '') + '/uploads/' + imageUrl;
   }
   

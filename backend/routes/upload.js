@@ -43,8 +43,11 @@ router.post('/', protect, admin, upload.single('image'), (req, res) => {
             return res.status(400).json({ message: 'No file uploaded' });
         }
 
-        // Return the file URL
-        const fileUrl = `/uploads/${req.file.filename}`;
+        // Return the file URL - construct full URL for remote deployment
+        const baseUrl = process.env.NODE_ENV === 'production' 
+            ? 'https://demak-ventures.onrender.com' 
+            : 'http://localhost:5000';
+        const fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
         
         res.json({
             message: 'File uploaded successfully',
@@ -67,8 +70,13 @@ router.post('/multiple', protect, admin, upload.array('images', 10), (req, res) 
             return res.status(400).json({ message: 'No files uploaded' });
         }
 
+        // Construct full URLs for remote deployment
+        const baseUrl = process.env.NODE_ENV === 'production' 
+            ? 'https://demak-ventures.onrender.com' 
+            : 'http://localhost:5000';
+            
         const uploadedFiles = req.files.map(file => ({
-            url: `/uploads/${file.filename}`,
+            url: `${baseUrl}/uploads/${file.filename}`,
             filename: file.filename,
             size: file.size,
             alt: '' // Can be updated later

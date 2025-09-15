@@ -17,7 +17,7 @@ const ImageUpload = ({ onUpload, multiple = false, className = '' }) => {
           try {
             const response = await adminApi.products.uploadImage(file);
             return {
-              url: `${import.meta.env.VITE_API_BASE_URL }`.replace('/api/v1', '') + response.url,
+              url: response.url, // Backend now returns full URL
               alt: file.name.split('.')[0]
             };
           } catch (error) {
@@ -37,7 +37,7 @@ const ImageUpload = ({ onUpload, multiple = false, className = '' }) => {
         const file = files[0];
         const response = await adminApi.products.uploadImage(file);
         onUpload({
-          url: `${import.meta.env.VITE_API_BASE_URL}`.replace('/api/v1', '') + response.url,
+          url: response.url, // Backend now returns full URL
           alt: file.name.split('.')[0]
         });
       }
