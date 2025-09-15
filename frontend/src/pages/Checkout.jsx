@@ -438,11 +438,11 @@ const Checkout = () => {
         orderItems: cartItems.map(item => ({
           product: item.product._id,
           name: item.product.name,
-          image: item.product.images?.[0]?.url || '',
+          image: item.product.images?.[0]?.url || item.product.image || '/api/placeholder/100/100',
           price: item.price,
           quantity: item.quantity,
-          size: item.size,
-          color: item.color
+          size: item.size || 'One Size',
+          color: item.color || 'Default'
         })),
         shippingAddress: {
           firstName: formData.firstName,

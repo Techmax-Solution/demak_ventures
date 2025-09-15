@@ -6,6 +6,8 @@ import Product from '../models/Product.js';
 // @access  Private
 export const createOrder = async (req, res) => {
     try {
+        console.log('Creating order with data:', JSON.stringify(req.body, null, 2));
+        
         const {
             orderItems,
             shippingAddress,
@@ -16,8 +18,36 @@ export const createOrder = async (req, res) => {
             paidAt
         } = req.body;
 
-        if (orderItems && orderItems.length === 0) {
+        if (!orderItems || orderItems.length === 0) {
             return res.status(400).json({ message: 'No order items' });
+        }
+
+        // Validate required fields
+        if (!shippingAddress) {
+            return res.status(400).json({ message: 'Shipping address is required' });
+        }
+
+        if (!paymentMethod) {
+            return res.status(400).json({ message: 'Payment method is required' });
+        }
+
+        // Validate shipping address fields
+        const requiredShippingFields = ['firstName', 'lastName', 'email', 'phone', 'street', 'city', 'state', 'zipCode'];
+        for (const field of requiredShippingFields) {
+            if (!shippingAddress[field]) {
+                return res.status(400).json({ message: `Shipping address ${field} is required` });
+            }
+        }
+
+        // Validate order items
+        for (let i = 0; i < orderItems.length; i++) {
+            const item = orderItems[i];
+            const requiredItemFields = ['product', 'name', 'image', 'price', 'quantity', 'size', 'color'];
+            for (const field of requiredItemFields) {
+                if (!item[field]) {
+                    return res.status(400).json({ message: `Order item ${i + 1} ${field} is required` });
+                }
+            }
         }
 
         // Verify products exist and have sufficient stock
@@ -66,7 +96,13 @@ export const createOrder = async (req, res) => {
 
         res.status(201).json(createdOrder);
     } catch (error) {
-        console.error(error);
+        console.error('Order creation error:', error);
+        console.error('Error details:', {
+            name: error.name,
+            message: error.message,
+            errors: error.errors,
+            code: error.code
+        });
         res.status(400).json({ message: 'Invalid order data', error: error.message });
     }
 };
