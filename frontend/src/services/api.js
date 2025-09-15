@@ -243,6 +243,16 @@ export const getTrendingProducts = async (limit = 4) => {
   }
 };
 
+export const getNewestProducts = async (limit = 3) => {
+  try {
+    const response = await api.get(`/products/newest?limit=${limit}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching newest products:', error);
+    throw error;
+  }
+};
+
 // Orders API calls
 export const getUserOrders = async () => {
   try {

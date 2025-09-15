@@ -274,6 +274,24 @@ export const getTopProducts = async (req, res) => {
     }
 };
 
+// @desc    Get newest products
+// @route   GET /api/products/newest
+// @access  Public
+export const getNewestProducts = async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 3;
+        const products = await Product.find({ isActive: true })
+            .populate('category', 'name slug')
+            .sort({ createdAt: -1 })
+            .limit(limit);
+
+        res.json(products);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 // @desc    Get product categories and filters
 // @route   GET /api/products/filters
 // @access  Public
