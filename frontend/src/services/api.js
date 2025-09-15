@@ -1,9 +1,11 @@
 import axios from 'axios';
+import SessionManager from '../utils/sessionManager.js';
+
 
 // Create axios instance with base configuration
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
-  timeout: 10000,
+  timeout: 30000, // Increased timeout to 30 seconds for remote server
   headers: {
     'Content-Type': 'application/json',
   },
@@ -12,9 +14,60 @@ const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    // Try multiple methods to get the token
+    let token = null;
+    
+    // Method 1: Use SessionManager
+    const sessionData = SessionManager.loadUserSession();
+    if (sessionData && sessionData.token) {
+      token = sessionData.token;
+    }
+    
+    // Method 2: Fallback to direct localStorage access
+    if (!token) {
+      token = localStorage.getItem('token');
+    }
+    
+    // Method 3: Try to get token from user object in localStorage
+    if (!token) {
+      try {
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          if (user && user.token) {
+            token = user.token;
+          }
+        }
+      } catch (e) {
+        console.warn('Error parsing user from localStorage:', e);
+      }
+    }
+    
+    // Clean up token - remove any surrounding quotes
     if (token) {
+      // Remove surrounding quotes if they exist
+      token = token.replace(/^"(.*)"$/, '$1');
+      // Also handle escaped quotes
+      token = token.replace(/\\"/g, '"');
+      
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('🔐 API Request: Token attached to request', {
+        url: config.url,
+        method: config.method,
+        tokenLength: token.length,
+        tokenStart: token.substring(0, 20) + '...',
+        userEmail: sessionData?.user?.email,
+        userRole: sessionData?.user?.role,
+        tokenSource: sessionData?.token ? 'sessionManager' : 'localStorage'
+      });
+    } else {
+      console.log('⚠️ API Request: No token found anywhere', {
+        url: config.url,
+        method: config.method,
+        hasSession: !!sessionData,
+        hasDirectToken: !!localStorage.getItem('token'),
+        hasUserToken: !!localStorage.getItem('user')
+      });
     }
     return config;
   },
@@ -29,13 +82,22 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Let the UserContext handle all auth-related 401 errors
-    // Only handle 401s for very specific non-auth endpoints if needed
-    // This prevents conflicts with UserContext auth management
-    
-    // Log the error for debugging but don't automatically redirect
+    // Enhanced error logging for debugging
     if (error.response?.status === 401) {
-      console.log('API request received 401, letting UserContext handle it');
+      console.error('🚨 API Request: 401 Unauthorized error', {
+        url: error.config?.url,
+        method: error.config?.method,
+        hasToken: !!error.config?.headers?.Authorization,
+        response: error.response?.data
+      });
+      
+      // Check if token exists in session
+      const sessionData = SessionManager.loadUserSession();
+      console.log('🔍 Session check after 401:', {
+        hasSession: !!sessionData,
+        hasToken: !!(sessionData?.token),
+        userEmail: sessionData?.user?.email
+      });
     }
     
     return Promise.reject(error);
@@ -167,6 +229,16 @@ export const getProductFilters = async () => {
     return response.data;
   } catch (error) {
     console.error('Error fetching product filters:', error);
+    throw error;
+  }
+};
+
+export const getTrendingProducts = async (limit = 4) => {
+  try {
+    const response = await api.get(`/products/top?limit=${limit}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching trending products:', error);
     throw error;
   }
 };

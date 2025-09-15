@@ -87,9 +87,12 @@ export class SessionManager {
 
   // Save complete user session
   static saveUserSession(userData, token, expiryTime) {
+    // Clean the token to ensure no extra quotes
+    const cleanToken = token ? token.replace(/^"(.*)"$/, '$1').replace(/\\"/g, '"') : token;
+    
     const sessionData = {
       user: userData,
-      token: token,
+      token: cleanToken,
       loginExpiry: expiryTime,
       loginTimestamp: Date.now(),
       sessionId: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -98,7 +101,7 @@ export class SessionManager {
     };
 
     // Save individual components
-    this.saveData(this.KEYS.TOKEN, token);
+    this.saveData(this.KEYS.TOKEN, cleanToken);
     this.saveData(this.KEYS.USER, userData);
     this.saveData(this.KEYS.LOGIN_EXPIRY, expiryTime.toString());
     this.saveData(this.KEYS.LOGIN_TIMESTAMP, sessionData.loginTimestamp.toString());
@@ -133,6 +136,11 @@ export class SessionManager {
         token = user.token;
         // Save it back to localStorage for future use
         localStorage.setItem(this.KEYS.TOKEN, token);
+      }
+      
+      // Clean the token to remove any extra quotes
+      if (token) {
+        token = token.replace(/^"(.*)"$/, '$1').replace(/\\"/g, '"');
       }
       
       // If token is still missing, log warning but continue

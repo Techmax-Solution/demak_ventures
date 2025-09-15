@@ -141,7 +141,7 @@ const NewArrivals = () => {
                     {/* Category & Rating - Simplified */}
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                        {product.category}
+                        {product.category?.name}
                       </span>
                       <div className="flex items-center gap-1">
                         <div className="flex items-center">

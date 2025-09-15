@@ -13,7 +13,24 @@ export const getProducts = async (req, res) => {
 
         // Category filter
         if (req.query.category) {
-            query.category = req.query.category;
+            // Handle both category ID and category name/slug
+            if (req.query.category.match(/^[0-9a-fA-F]{24}$/)) {
+                // If it's a valid ObjectId, use it directly
+                query.category = req.query.category;
+            } else {
+                // If it's a name or slug, find the category first
+                const Category = (await import('../models/Category.js')).default;
+                const category = await Category.findOne({
+                    $or: [
+                        { name: { $regex: req.query.category, $options: 'i' } },
+                        { slug: req.query.category }
+                    ],
+                    isActive: true
+                });
+                if (category) {
+                    query.category = category._id;
+                }
+            }
         }
 
         // Subcategory filter
@@ -99,6 +116,7 @@ export const getProducts = async (req, res) => {
 
         const total = await Product.countDocuments(query);
         const products = await Product.find(query)
+            .populate('category', 'name slug')
             .sort(sortBy)
             .skip(skip)
             .limit(limit);
@@ -124,7 +142,9 @@ export const getProducts = async (req, res) => {
 // @access  Public
 export const getProductById = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id);
+        const product = await Product.findById(req.params.id)
+            .populate('category', 'name slug')
+            .populate('reviews.user', 'name email');
 
         if (product && product.isActive) {
             res.json(product);
@@ -243,6 +263,7 @@ export const getTopProducts = async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 5;
         const products = await Product.find({ isActive: true })
+            .populate('category', 'name slug')
             .sort({ averageRating: -1, numReviews: -1 })
             .limit(limit);
 
@@ -258,7 +279,12 @@ export const getTopProducts = async (req, res) => {
 // @access  Public
 export const getProductFilters = async (req, res) => {
     try {
-        const categories = await Product.distinct('category', { isActive: true });
+        // Get active categories from Category model
+        const Category = (await import('../models/Category.js')).default;
+        const categories = await Category.find({ isActive: true })
+            .select('name slug')
+            .sort({ sortOrder: 1, name: 1 });
+
         const subcategories = await Product.distinct('subcategory', { isActive: true });
         const brands = await Product.distinct('brand', { isActive: true });
         const colors = await Product.distinct('colors.color', { isActive: true });
@@ -277,7 +303,7 @@ export const getProductFilters = async (req, res) => {
         ]);
 
         res.json({
-            categories: categories.sort(),
+            categories: categories,
             subcategories: subcategories.sort(),
             brands: brands.sort(),
             colors: colors.sort(),

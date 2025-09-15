@@ -25,6 +25,11 @@ import AdminUsers from './pages/admin/AdminUsers';
 import ProtectedAdminRoute from './components/admin/ProtectedAdminRoute';
 import SessionDebugger from './components/SessionDebugger';
 
+// Import auth debug utility in development
+if (process.env.NODE_ENV === 'development') {
+  import('./utils/authDebug.js');
+}
+
 function App() {
   return (
     <UserProvider>

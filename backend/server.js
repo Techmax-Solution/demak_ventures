@@ -10,6 +10,7 @@ import { notFound, errorHandler } from './middleware/errorHandler.js';
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
 import productRoutes from './routes/products.js';
+import categoryRoutes from './routes/categories.js';
 import orderRoutes from './routes/orders.js';
 import uploadRoutes from './routes/upload.js';
 import paystackRoutes from './routes/paystack.js';
@@ -47,6 +48,7 @@ app.get('/', (req, res) => {
             auth: '/api/v1/auth',
             users: '/api/v1/users',
             products: '/api/v1/products',
+            categories: '/api/v1/categories',
             orders: '/api/v1/orders',
             paystack: '/api/v1/paystack'
         }
@@ -57,6 +59,7 @@ app.get('/', (req, res) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/products', productRoutes);
+app.use('/api/v1/categories', categoryRoutes);
 app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/admin/upload', uploadRoutes);
 app.use('/api/v1/paystack', paystackRoutes);

@@ -4,7 +4,14 @@ import { useAdmin } from '../../context/AdminContext';
 const ProtectedAdminRoute = ({ children }) => {
   const { isAuthenticated, isAdmin, loading } = useAdmin();
 
+  console.log('🛡️ ProtectedAdminRoute: Checking access', {
+    isAuthenticated,
+    isAdmin,
+    loading
+  });
+
   if (loading) {
+    console.log('🛡️ ProtectedAdminRoute: Still loading...');
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -16,9 +23,11 @@ const ProtectedAdminRoute = ({ children }) => {
   }
 
   if (!isAuthenticated || !isAdmin) {
+    console.log('🛡️ ProtectedAdminRoute: Access denied, redirecting to login');
     return <Navigate to="/admin/login" replace />;
   }
 
+  console.log('🛡️ ProtectedAdminRoute: Access granted, rendering children');
   return children;
 };
 

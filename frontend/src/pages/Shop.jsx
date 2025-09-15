@@ -31,6 +31,7 @@ const Shop = () => {
   const fetchAllProducts = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null); // Clear any previous errors
       console.log('Fetching all products...');
       const data = await getProducts({}); // Fetch all products without filters
       console.log('Received products data:', data);
@@ -67,12 +68,13 @@ const Shop = () => {
       console.log('Received filter data:', filterData);
       
       const newFilters = {
-        categories: filterData.categories || [],
-        colors: filterData.colors || [],
-        sizes: filterData.sizes || [],
+        categories: Array.isArray(filterData.categories) ? filterData.categories.filter(cat => cat && (cat.name || cat.slug)) : [],
+        colors: Array.isArray(filterData.colors) ? filterData.colors.filter(color => color) : [],
+        sizes: Array.isArray(filterData.sizes) ? filterData.sizes.filter(size => size) : [],
         priceRange: filterData.priceRange || { minPrice: 40, maxPrice: 210 }
       };
       
+      console.log('Setting available filters:', newFilters);
       setAvailableFilters(newFilters);
 
       // Update initial price range based on backend data
@@ -90,7 +92,14 @@ const Shop = () => {
       console.error('Error fetching filters:', err);
       // Use default values if filters fetch fails
       const defaultFilters = {
-        categories: ['accessories', 'bag', 'men', 'shoes', 'tops', 'women'],
+        categories: [
+          { name: 'Men', slug: 'men' },
+          { name: 'Women', slug: 'women' },
+          { name: 'Kids', slug: 'kids' },
+          { name: 'Accessories', slug: 'accessories' },
+          { name: 'Shoes', slug: 'shoes' },
+          { name: 'Bags', slug: 'bags' }
+        ],
         colors: ['beige', 'black', 'gray', 'yellow', 'pink', 'red'],
         sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
         priceRange: { minPrice: 40, maxPrice: 210 }
@@ -105,6 +114,31 @@ const Shop = () => {
     fetchAvailableFilters();
   }, [fetchAllProducts, fetchAvailableFilters]);
 
+  // Refresh filters when component becomes visible (e.g., when navigating back from admin)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('Shop page became visible, refreshing filters...');
+        fetchAvailableFilters();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Also refresh filters when the page regains focus
+    const handleFocus = () => {
+      console.log('Shop page gained focus, refreshing filters...');
+      fetchAvailableFilters();
+    };
+
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [fetchAvailableFilters]);
+
   // Memoized filter application to prevent unnecessary re-renders
   const filteredProducts = useMemo(() => {
     if (allProducts.length === 0) return [];
@@ -113,9 +147,11 @@ const Shop = () => {
 
     // Filter by categories
     if (filters.categories.length > 0) {
-      filtered = filtered.filter(product => 
-        filters.categories.includes(product.category?.toLowerCase())
-      );
+      filtered = filtered.filter(product => {
+        if (!product?.category) return false;
+        const productCategorySlug = product.category?.slug || product.category?.name?.toLowerCase();
+        return productCategorySlug && filters.categories.includes(productCategorySlug);
+      });
     }
 
     // Filter by price range
@@ -187,11 +223,12 @@ const Shop = () => {
           categories: checked ? [] : prev.categories
         }));
       } else {
+        // category is already a slug string from the map function
         setFilters(prev => ({
           ...prev,
           categories: checked 
-            ? [...prev.categories, category.toLowerCase()]
-            : prev.categories.filter(c => c !== category.toLowerCase())
+            ? [...prev.categories, category]
+            : prev.categories.filter(c => c !== category)
         }));
       }
     });
@@ -246,7 +283,7 @@ const Shop = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading products...</p>
+          <p className="mt-4 text-gray-600">Loading products Now...</p>
         </div>
       </div>
     );
@@ -364,25 +401,40 @@ const Shop = () => {
                     />
                     <span className="ml-3 text-sm text-gray-700">All Categories</span>
                   </label>
-                {availableFilters.categories.map(category => {
-                  const categoryCount = allProducts.filter(product => 
-                    product.category?.toLowerCase() === category.toLowerCase()
-                  ).length;
-                  
-                    return (
-                      <label key={category} className="flex items-center cursor-pointer p-2 -m-2 rounded hover:bg-gray-50">
-                        <input 
-                          type="checkbox" 
-                          className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black" 
-                          checked={filters.categories.includes(category.toLowerCase())}
-                          onChange={(e) => handleCategoryChange(category, e.target.checked)}
-                        />
-                        <span className="ml-3 text-sm text-gray-700">
-                          {category.charAt(0).toUpperCase() + category.slice(1)} ({categoryCount})
-                        </span>
-                      </label>
-                    );
-                  })}
+                {availableFilters.categories && availableFilters.categories.length > 0 ? availableFilters.categories
+                  .filter(category => category && (typeof category === 'string' || (category.name || category.slug))) // Filter out null/undefined categories
+                  .map(category => {
+                    try {
+                      // Handle both object and string formats for backward compatibility
+                      const categorySlug = typeof category === 'string' ? category : (category?.slug || category?.name?.toLowerCase() || '');
+                      const categoryName = typeof category === 'string' ? category : (category?.name || category || 'Unknown');
+                      const categoryCount = allProducts.filter(product => {
+                        const productCategorySlug = product?.category?.slug || product?.category?.name?.toLowerCase();
+                        return productCategorySlug === categorySlug;
+                      }).length;
+                      
+                      return (
+                        <label key={categorySlug} className="flex items-center cursor-pointer p-2 -m-2 rounded hover:bg-gray-50">
+                          <input 
+                            type="checkbox" 
+                            className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black" 
+                            checked={filters.categories.includes(categorySlug)}
+                            onChange={(e) => handleCategoryChange(categorySlug, e.target.checked)}
+                          />
+                          <span className="ml-3 text-sm text-gray-700">
+                            {categoryName} ({categoryCount})
+                          </span>
+                        </label>
+                      );
+                    } catch (error) {
+                      console.error('Error rendering category:', category, error);
+                      return null; // Skip this category if there's an error
+                    }
+                  })
+                  .filter(Boolean) // Remove any null entries from errors
+                  : (
+                    <div className="text-sm text-gray-500 p-2">No categories available</div>
+                  )}
                 </div>
               </div>
 
@@ -568,7 +620,7 @@ const Shop = () => {
                     
                     {/* Product Info */}
                     <div className="p-3 lg:p-4">
-                      <p className="text-xs lg:text-sm text-gray-500 mb-1 truncate">{product.category || 'Accessory'}</p>
+                      <p className="text-xs lg:text-sm text-gray-500 mb-1 truncate">{product.category?.name || 'Accessory'}</p>
                       <h3 className="font-medium text-gray-900 mb-2 text-sm lg:text-base line-clamp-2 leading-tight">{product.name}</h3>
                       <div className="flex items-center gap-1 lg:gap-2 flex-wrap">
                         {product.originalPrice && (

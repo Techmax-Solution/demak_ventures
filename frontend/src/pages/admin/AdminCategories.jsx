@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import Table from '../../components/admin/Table';
 import FormModal from '../../components/admin/FormModal';
+import AuthDebugPanel from '../../components/admin/AuthDebugPanel';
 import adminApi from '../../services/adminApi';
 
 const AdminCategories = () => {
@@ -12,7 +13,11 @@ const AdminCategories = () => {
   const [formLoading, setFormLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    description: ''
+    description: '',
+    sortOrder: 0,
+    isActive: true,
+    seoTitle: '',
+    seoDescription: ''
   });
 
   useEffect(() => {
@@ -43,7 +48,11 @@ const AdminCategories = () => {
   const resetForm = () => {
     setFormData({
       name: '',
-      description: ''
+      description: '',
+      sortOrder: 0,
+      isActive: true,
+      seoTitle: '',
+      seoDescription: ''
     });
     setEditingCategory(null);
   };
@@ -57,7 +66,11 @@ const AdminCategories = () => {
     setEditingCategory(category);
     setFormData({
       name: category.name || '',
-      description: category.description || ''
+      description: category.description || '',
+      sortOrder: category.sortOrder || 0,
+      isActive: category.isActive !== undefined ? category.isActive : true,
+      seoTitle: category.seoTitle || '',
+      seoDescription: category.seoDescription || ''
     });
     setModalOpen(true);
   };
@@ -68,8 +81,8 @@ const AdminCategories = () => {
     }
 
     try {
-      // Since categories are hardcoded in the backend, we'll show a message
-      alert('Categories are currently hardcoded in the system. To modify categories, please update the backend Product model.');
+      await adminApi.categories.deleteCategory(category._id);
+      fetchCategories(); // Refresh the categories list
     } catch (error) {
       console.error('Error deleting category:', error);
       alert('Error deleting category. Please try again.');
@@ -81,11 +94,15 @@ const AdminCategories = () => {
     setFormLoading(true);
 
     try {
-      // Since categories are hardcoded in the backend, we'll show a message
-      alert('Categories are currently hardcoded in the system. To add/edit categories, please update the backend Product model.');
+      if (editingCategory) {
+        await adminApi.categories.updateCategory(editingCategory._id, formData);
+      } else {
+        await adminApi.categories.createCategory(formData);
+      }
       
       setModalOpen(false);
       resetForm();
+      fetchCategories(); // Refresh the categories list
     } catch (error) {
       console.error('Error saving category:', error);
       alert('Error saving category. Please try again.');
@@ -100,7 +117,7 @@ const AdminCategories = () => {
       title: 'ID',
       render: (id) => (
         <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
-          {id}
+          {id?.slice(-8)}
         </span>
       )
     },
@@ -114,15 +131,43 @@ const AdminCategories = () => {
       )
     },
     { 
+      key: 'slug', 
+      title: 'Slug',
+      render: (slug) => (
+        <span className="font-mono text-sm text-gray-600">
+          {slug}
+        </span>
+      )
+    },
+    { 
       key: 'description', 
-      title: 'Description'
+      title: 'Description',
+      render: (description) => (
+        <span className="text-sm text-gray-600 max-w-xs truncate">
+          {description || 'No description'}
+        </span>
+      )
     },
     {
-      key: 'status',
+      key: 'sortOrder',
+      title: 'Order',
+      render: (sortOrder) => (
+        <span className="text-sm font-medium">
+          {sortOrder || 0}
+        </span>
+      ),
+      sortable: true
+    },
+    {
+      key: 'isActive',
       title: 'Status',
-      render: () => (
-        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-          Active
+      render: (isActive) => (
+        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+          isActive 
+            ? 'bg-green-100 text-green-800' 
+            : 'bg-red-100 text-red-800'
+        }`}>
+          {isActive ? 'Active' : 'Inactive'}
         </span>
       ),
       sortable: false
@@ -132,6 +177,9 @@ const AdminCategories = () => {
   return (
     <AdminLayout>
       <div className="space-y-4 sm:space-y-6">
+        {/* Debug Panel - Remove this after debugging */}
+        {process.env.NODE_ENV === 'development' && <AuthDebugPanel />}
+        
         {/* Header */}
         <div className="flex flex-col space-y-4 sm:flex-row sm:justify-between sm:items-center sm:space-y-0">
           <div className="min-w-0 flex-1">
@@ -151,28 +199,6 @@ const AdminCategories = () => {
           </div>
         </div>
 
-        {/* Info Notice */}
-        <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-blue-800">
-                Categories Information
-              </h3>
-              <div className="mt-2 text-sm text-blue-700">
-                <p>
-                  Categories are currently hardcoded in the backend system. The available categories are: 
-                  Men, Women, Kids, Accessories, Shoes, and Bags. To modify categories, you would need to 
-                  update the Product model in the backend and create appropriate API endpoints.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Categories Table */}
         <Table
@@ -211,9 +237,6 @@ const AdminCategories = () => {
                 className="input-field"
                 placeholder="Enter category name"
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Note: This will not actually create a new category due to backend constraints
-              </p>
             </div>
 
             <div>
@@ -230,21 +253,66 @@ const AdminCategories = () => {
               />
             </div>
 
-            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.996-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-yellow-700">
-                    <strong>Important:</strong> Categories are currently hardcoded in the backend. 
-                    This form is for demonstration purposes. To implement full category management, 
-                    you would need to create a Category model and appropriate API endpoints in the backend.
-                  </p>
-                </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Sort Order
+                </label>
+                <input
+                  type="number"
+                  name="sortOrder"
+                  value={formData.sortOrder}
+                  onChange={handleInputChange}
+                  className="input-field"
+                  placeholder="0"
+                  min="0"
+                />
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Status
+                </label>
+                <select
+                  name="isActive"
+                  value={formData.isActive}
+                  onChange={handleInputChange}
+                  className="input-field"
+                >
+                  <option value={true}>Active</option>
+                  <option value={false}>Inactive</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                SEO Title
+              </label>
+              <input
+                type="text"
+                name="seoTitle"
+                value={formData.seoTitle}
+                onChange={handleInputChange}
+                className="input-field"
+                placeholder="SEO title for search engines"
+                maxLength="60"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                SEO Description
+              </label>
+              <textarea
+                name="seoDescription"
+                value={formData.seoDescription}
+                onChange={handleInputChange}
+                rows={2}
+                className="input-field"
+                placeholder="SEO description for search engines"
+                maxLength="160"
+              />
             </div>
           </div>
         </FormModal>

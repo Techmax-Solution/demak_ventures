@@ -65,25 +65,79 @@ export const adminProductsAPI = {
   }
 };
 
-// Admin Categories API (since categories are hardcoded, we'll provide static data)
+// Admin Categories API
 export const adminCategoriesAPI = {
   // Get all categories
-  getAllCategories: async () => {
+  getAllCategories: async (params = {}) => {
     try {
-      // Since categories are hardcoded in the backend, we'll return static data
-      // In a real implementation, this would be a backend endpoint
-      const categories = [
-        { _id: 'men', name: 'Men', description: 'Men\'s clothing and accessories' },
-        { _id: 'women', name: 'Women', description: 'Women\'s clothing and accessories' },
-        { _id: 'kids', name: 'Kids', description: 'Children\'s clothing and accessories' },
-        { _id: 'accessories', name: 'Accessories', description: 'Fashion accessories' },
-        { _id: 'shoes', name: 'Shoes', description: 'Footwear for all ages' },
-        { _id: 'bags', name: 'Bags', description: 'Bags and luggage' }
-      ];
-      
-      return { categories };
+      const response = await api.get('/categories', { params });
+      return response.data;
     } catch (error) {
       console.error('Error fetching categories:', error);
+      throw error;
+    }
+  },
+
+  // Get single category
+  getCategoryById: async (id) => {
+    try {
+      const response = await api.get(`/categories/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching category:', error);
+      throw error;
+    }
+  },
+
+  // Create category
+  createCategory: async (categoryData) => {
+    try {
+      const response = await api.post('/categories', categoryData);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating category:', error);
+      throw error;
+    }
+  },
+
+  // Update category
+  updateCategory: async (id, categoryData) => {
+    try {
+      const response = await api.put(`/categories/${id}`, categoryData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating category:', error);
+      throw error;
+    }
+  },
+
+  // Delete category
+  deleteCategory: async (id) => {
+    try {
+      console.log('🗑️ Attempting to delete category:', id);
+      const response = await api.delete(`/categories/${id}`);
+      console.log('✅ Category deleted successfully');
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error deleting category:', error);
+      console.error('Error details:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        url: error.config?.url,
+        method: error.config?.method
+      });
+      throw error;
+    }
+  },
+
+  // Get category tree
+  getCategoryTree: async () => {
+    try {
+      const response = await api.get('/categories/tree');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching category tree:', error);
       throw error;
     }
   },

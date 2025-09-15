@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { authAPI } from '../services/api.js';
+import { useUser } from './UserContext';
 
 const AdminContext = createContext();
 
@@ -12,8 +13,7 @@ export const useAdmin = () => {
 };
 
 export const AdminProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { user, isAuthenticated, login: userLogin, logout: userLogout } = useUser();
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -22,28 +22,34 @@ export const AdminProvider = ({ children }) => {
     checkAuth();
   }, []);
 
+  // Monitor user changes from UserContext
+  useEffect(() => {
+    console.log('🔍 AdminContext: User state changed', {
+      isAuthenticated,
+      user: user ? { name: user.name, email: user.email, role: user.role } : null,
+      currentIsAdmin: isAdmin
+    });
+    
+    if (isAuthenticated && user && user.role === 'admin') {
+      console.log('✅ AdminContext: Setting isAdmin to true');
+      setIsAdmin(true);
+    } else {
+      console.log('❌ AdminContext: Setting isAdmin to false');
+      setIsAdmin(false);
+    }
+  }, [isAuthenticated, user]);
+
   const checkAuth = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      const userData = await authAPI.getProfile();
-      if (userData && userData.role === 'admin') {
-        setUser(userData);
-        setIsAuthenticated(true);
+      // Check if user is authenticated and is admin
+      if (isAuthenticated && user && user.role === 'admin') {
         setIsAdmin(true);
       } else {
-        // User is not admin, clear token
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        setIsAdmin(false);
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      console.error('Admin auth check failed:', error);
+      setIsAdmin(false);
     } finally {
       setLoading(false);
     }
@@ -51,36 +57,42 @@ export const AdminProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-      const response = await authAPI.login(credentials);
+      console.log('🔐 AdminContext: Starting admin login...');
+      
+      // Use UserContext login first
+      const response = await userLogin(credentials);
+      console.log('✅ AdminContext: UserContext login successful', {
+        name: response.name,
+        email: response.email,
+        role: response.role
+      });
       
       if (response.role !== 'admin') {
+        console.log('❌ AdminContext: User is not admin, logging out...');
+        // If not admin, logout from UserContext
+        await userLogout();
         throw new Error('Access denied. Admin privileges required.');
       }
 
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(response));
-      
-      setUser(response);
-      setIsAuthenticated(true);
+      // Set admin state
+      console.log('✅ AdminContext: Setting isAdmin to true');
       setIsAdmin(true);
       
       return response;
     } catch (error) {
-      console.error('Admin login failed:', error);
+      console.error('❌ AdminContext: Admin login failed:', error);
+      setIsAdmin(false);
       throw error;
     }
   };
 
   const logout = async () => {
     try {
-      await authAPI.logout();
+      // Use UserContext logout
+      await userLogout();
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      setUser(null);
-      setIsAuthenticated(false);
       setIsAdmin(false);
     }
   };

@@ -43,12 +43,9 @@ const productSchema = new mongoose.Schema({
         min: [0, 'Original price cannot be negative']
     },
     category: {
-        type: String,
-        required: [true, 'Please add a category'],
-        enum: {
-            values: ['men', 'women', 'kids', 'accessories', 'shoes', 'bags'],
-            message: 'Category must be one of: men, women, kids, accessories, shoes, bags'
-        }
+        type: mongoose.Schema.ObjectId,
+        ref: 'Category',
+        required: [true, 'Please select a category']
     },
     subcategory: {
         type: String,

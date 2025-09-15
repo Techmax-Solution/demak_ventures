@@ -67,7 +67,7 @@ const ProductCard = memo(({ product }) => {
           <h3 className="text-lg font-semibold text-gray-800 mb-2 hover:text-blue-600 transition-colors duration-200">
             {product.name}
           </h3>
-          <p className="text-gray-600 text-sm mb-2 capitalize">{product.category}</p>
+          <p className="text-gray-600 text-sm mb-2 capitalize">{product.category?.name}</p>
           <p className="text-gray-600 text-sm mb-3 line-clamp-2">
             {product.description}
           </p>

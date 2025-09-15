@@ -87,7 +87,7 @@ const Cart = () => {
                       {item.product.name}
                     </Link>
                     
-                    <p className="text-gray-600 capitalize">{item.product.category}</p>
+                    <p className="text-gray-600 capitalize">{item.product.category?.name}</p>
                     
                     {item.size && (
                       <p className="text-sm text-gray-600">

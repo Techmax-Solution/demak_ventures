@@ -31,7 +31,7 @@ const AdminProducts = () => {
   });
 
   const sizeOptions = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '28', '30', '32', '34', '36', '38', '40', '42', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', 'One Size'];
-  const categoryOptions = ['men', 'women', 'kids', 'accessories', 'shoes', 'bags'];
+  // categoryOptions will be populated from the API
 
   useEffect(() => {
     fetchProducts();
@@ -161,7 +161,7 @@ const AdminProducts = () => {
       description: product.description || '',
       price: product.price || '',
       originalPrice: product.originalPrice || '',
-      category: product.category || '',
+      category: product.category?._id || product.category || '',
       subcategory: product.subcategory || '',
       brand: product.brand || '',
       sizes: product.sizes?.length > 0 ? product.sizes : [{ size: 'S', quantity: 0 }],
@@ -382,9 +382,9 @@ const AdminProducts = () => {
                   className="input-field"
                 >
                   <option value="">Select category</option>
-                  {categoryOptions.map(category => (
-                    <option key={category} value={category}>
-                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                  {categories.map(category => (
+                    <option key={category._id} value={category._id}>
+                      {category.name}
                     </option>
                   ))}
                 </select>

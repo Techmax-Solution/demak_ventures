@@ -115,7 +115,7 @@ const ProductDetails = () => {
               SHOP
         </button>
             <span className="text-gray-400">/</span>
-            <span className="text-gray-500 uppercase">{product.category}</span>
+            <span className="text-gray-500 uppercase">{product.category?.name}</span>
             <span className="text-gray-400">/</span>
             <span className="text-gray-900 font-medium uppercase">{product.name}</span>
           </nav>
