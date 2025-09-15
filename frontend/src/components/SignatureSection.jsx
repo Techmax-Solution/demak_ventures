@@ -80,7 +80,7 @@ const SignatureSection = () => {
                    className="w-80 h-96 lg:w-96 lg:h-[500px] object-cover rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105"
                    onError={(e) => {
                      // Fallback to a placeholder or different image
-                     e.target.src = "https://via.placeholder.com/500x600/FCD34D/000000?text=Fashion+Model";
+                     e.target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjYwMCIgdmlld0JveD0iMCAwIDUwMCA2MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjRkNEMzREIi8+Cjx0ZXh0IHg9IjI1MCIgeT0iMzAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMDAwMDAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiPkZhc2hpb24gTW9kZWw8L3RleHQ+Cjwvc3ZnPg==";
                    }}
                  />
                 

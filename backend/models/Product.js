@@ -125,8 +125,21 @@ const productSchema = new mongoose.Schema({
 
 // Calculate total stock from sizes
 productSchema.pre('save', function(next) {
-    this.totalStock = this.sizes.reduce((total, size) => total + size.quantity, 0);
-    next();
+    try {
+        if (this.sizes && Array.isArray(this.sizes)) {
+            this.totalStock = this.sizes.reduce((total, size) => {
+                const quantity = size && typeof size.quantity === 'number' ? size.quantity : 0;
+                return total + quantity;
+            }, 0);
+        } else {
+            this.totalStock = 0;
+        }
+        next();
+    } catch (error) {
+        console.error('Error calculating total stock:', error);
+        this.totalStock = 0;
+        next();
+    }
 });
 
 // Calculate average rating

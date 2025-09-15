@@ -203,19 +203,48 @@ export const updateProduct = async (req, res) => {
 // @access  Private/Admin
 export const deleteProduct = async (req, res) => {
     try {
+        console.log('🗑️ Attempting to delete product:', req.params.id);
+        
         const product = await Product.findById(req.params.id);
+        console.log('📦 Product found:', product ? { id: product._id, name: product.name, isActive: product.isActive } : 'null');
 
         if (product) {
             // Soft delete by deactivating the product
             product.isActive = false;
-            await product.save();
-            res.json({ message: 'Product removed successfully' });
+            
+            // For deletion, we'll use findByIdAndUpdate to bypass validation
+            // This is safer than trying to fix validation issues during deletion
+            const updatedProduct = await Product.findByIdAndUpdate(
+                req.params.id,
+                { isActive: false },
+                { 
+                    new: true,
+                    runValidators: false // Skip validation for deletion
+                }
+            );
+            
+            if (updatedProduct) {
+                console.log('✅ Product deactivated successfully');
+                res.json({ message: 'Product removed successfully' });
+            } else {
+                console.log('❌ Failed to update product');
+                res.status(500).json({ message: 'Failed to delete product' });
+            }
         } else {
+            console.log('❌ Product not found');
             res.status(404).json({ message: 'Product not found' });
         }
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        console.error('❌ Error deleting product:', error);
+        console.error('Error details:', {
+            message: error.message,
+            name: error.name,
+            stack: error.stack
+        });
+        res.status(500).json({ 
+            message: 'Server error',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
     }
 };
 

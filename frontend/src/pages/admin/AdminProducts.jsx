@@ -4,6 +4,7 @@ import Table from '../../components/admin/Table';
 import FormModal from '../../components/admin/FormModal';
 import ImageUpload from '../../components/admin/ImageUpload';
 import adminApi from '../../services/adminApi';
+import { fixProductsImageUrls, getPlaceholderImage } from '../../utils/imageUtils';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
@@ -42,7 +43,9 @@ const AdminProducts = () => {
     try {
       setLoading(true);
       const response = await adminApi.products.getAllProducts();
-      setProducts(response.products || response || []);
+      const productsData = response.products || response || [];
+      // Fix image URLs for all products
+      setProducts(fixProductsImageUrls(productsData));
     } catch (error) {
       console.error('Error fetching products:', error);
       setProducts([]);
@@ -227,17 +230,33 @@ const AdminProducts = () => {
     {
       key: 'images',
       title: 'Image',
-      render: (images) => (
-        <img 
-          src={images?.[0]?.url || 'https://via.placeholder.com/50'} 
-          alt="Product" 
-          className="w-12 h-12 object-cover rounded"
-        />
-      ),
+      render: (images) => {
+        const imageUrl = images?.[0]?.url;
+        return (
+          <img 
+            src={imageUrl || getPlaceholderImage()} 
+            alt="Product" 
+            className="w-12 h-12 object-cover rounded"
+            onError={(e) => {
+              e.target.src = getPlaceholderImage();
+            }}
+          />
+        );
+      },
       sortable: false
     },
     { key: 'name', title: 'Name' },
-    { key: 'category', title: 'Category' },
+    { 
+      key: 'category', 
+      title: 'Category',
+      render: (category) => {
+        // Handle both object and string category formats
+        if (typeof category === 'object' && category !== null) {
+          return category.name || category.slug || 'Unknown';
+        }
+        return category || 'Unknown';
+      }
+    },
     { key: 'brand', title: 'Brand' },
     { 
       key: 'price', 
