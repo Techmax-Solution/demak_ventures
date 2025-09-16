@@ -100,7 +100,7 @@ const AdminDashboard = () => {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
         </div>
       </AdminLayout>
     );
@@ -304,88 +304,7 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-          <div className="bg-white shadow rounded-lg p-4 sm:p-6">
-            <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Quick Actions</h3>
-            <div className="space-y-3">
-              <button className="w-full text-left px-4 py-2 bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 transition-colors">
-                Add New Product
-              </button>
-              <button className="w-full text-left px-4 py-2 bg-green-50 text-green-700 rounded-md hover:bg-green-100 transition-colors">
-                View Pending Orders
-              </button>
-              <button className="w-full text-left px-4 py-2 bg-purple-50 text-purple-700 rounded-md hover:bg-purple-100 transition-colors">
-                Manage Categories
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white shadow rounded-lg p-4 sm:p-6">
-            <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">System Status</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">API Status</span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  Online
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Database</span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  Connected
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Active Users</span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                  {stats.users.active} online
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Pending Orders</span>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  stats.orders.pending > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
-                }`}>
-                  {stats.orders.pending} pending
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white shadow rounded-lg p-4 sm:p-6">
-            <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Recent Activity</h3>
-            <div className="space-y-3 text-sm">
-              {recentOrders.length > 0 ? (
-                recentOrders.slice(0, 3).map((order, index) => (
-                  <div key={order._id} className="flex items-start space-x-3">
-                    <div className={`w-2 h-2 rounded-full mt-2 ${
-                      order.status === 'delivered' ? 'bg-green-400' :
-                      order.status === 'shipped' ? 'bg-blue-400' :
-                      order.status === 'processing' ? 'bg-yellow-400' :
-                      'bg-gray-400'
-                    }`}></div>
-                    <div>
-                      <p className="text-gray-900">
-                        {order.status === 'delivered' ? 'Order delivered' :
-                         order.status === 'shipped' ? 'Order shipped' :
-                         order.status === 'processing' ? 'Order processing' :
-                         'New order received'}
-                      </p>
-                      <p className="text-gray-500">
-                        {new Date(order.createdAt).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center text-gray-500 py-4">
-                  No recent activity
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+    
       </div>
     </AdminLayout>
   );

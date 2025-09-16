@@ -41,9 +41,8 @@ const Checkout = () => {
 
   // Calculate totals
   const subtotal = totalPrice;
-  const tax = totalPrice * 0.08;
   const shipping = 0;
-  const total = subtotal + tax + shipping;
+  const total = subtotal + shipping;
 
   // Paystack payment handlers
   const initializePaystackPayment = () => {
@@ -529,7 +528,7 @@ const Checkout = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -545,7 +544,7 @@ const Checkout = () => {
         {paymentStep === 'payment' && (
           <div className="mb-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-center space-x-3">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
               <div>
                 <h3 className="font-semibold text-blue-800">Payment in Progress</h3>
                 <p className="text-orange-500">Complete your payment in the Paystack popup to finish your order.</p>
@@ -768,10 +767,6 @@ const Checkout = () => {
                   <span>Free</span>
                 </div>
                 
-                <div className="flex justify-between text-gray-600">
-                  <span>Tax:</span>
-                  <span>₵{tax.toFixed(2)}</span>
-                </div>
                 
                 <div className="border-t border-gray-200 pt-3">
                   <div className="flex justify-between text-lg font-semibold text-gray-800">

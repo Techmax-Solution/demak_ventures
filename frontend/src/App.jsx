@@ -27,7 +27,6 @@ import AdminUsers from './pages/admin/AdminUsers';
 import AdminHeroImages from './pages/admin/AdminHeroImages';
 import AdminAdmins from './pages/admin/AdminAdmins';
 import ProtectedAdminRoute from './components/admin/ProtectedAdminRoute';
-import SessionDebugger from './components/SessionDebugger';
 
 // Import auth debug utility in development
 if (process.env.NODE_ENV === 'development') {
@@ -82,10 +81,10 @@ function App() {
 
             {/* Public Routes */}
             <Route path="/*" element={
-              <div className="min-h-screen flex flex-col">
+              <div className="min-h-screen flex flex-col overflow-x-hidden">
                 <TopBanner />
                 <Navbar />
-                <main className="flex-1">
+                <main className="flex-1 overflow-x-hidden">
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/shop" element={<Shop />} />
@@ -103,7 +102,6 @@ function App() {
               </div>
             } />
           </Routes>
-          <SessionDebugger />
         </Router>
         </AdminProvider>
       </CartProvider>

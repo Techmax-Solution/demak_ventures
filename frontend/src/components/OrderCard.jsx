@@ -89,12 +89,6 @@ const OrderCard = ({ order }) => {
             <span className="text-gray-800">₵{order.shippingPrice.toFixed(2)}</span>
           </div>
         )}
-        {order.taxPrice && (
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-gray-600">Tax:</span>
-            <span className="text-gray-800">₵{order.taxPrice.toFixed(2)}</span>
-          </div>
-        )}
         {order.discount && (
           <div className="flex justify-between items-center mb-2">
             <span className="text-gray-600">Discount:</span>

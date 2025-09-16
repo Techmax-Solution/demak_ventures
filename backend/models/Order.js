@@ -104,12 +104,6 @@ const orderSchema = new mongoose.Schema({
         default: 0.0,
         min: 0
     },
-    taxPrice: {
-        type: Number,
-        required: true,
-        default: 0.0,
-        min: 0
-    },
     shippingPrice: {
         type: Number,
         required: true,
@@ -170,14 +164,12 @@ orderSchema.pre('save', function(next) {
     // Calculate items price
     this.itemsPrice = this.orderItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
     
-    // Calculate tax (assuming 8.5% tax rate)
-    this.taxPrice = Math.round((this.itemsPrice * 0.085) * 100) / 100;
     
     // Calculate shipping (free shipping over ₵100, otherwise ₵10)
     this.shippingPrice = this.itemsPrice > 100 ? 0 : 10;
     
     // Calculate total price
-    this.totalPrice = this.itemsPrice + this.taxPrice + this.shippingPrice - this.discountAmount;
+    this.totalPrice = this.itemsPrice + this.shippingPrice - this.discountAmount;
     
     next();
 });

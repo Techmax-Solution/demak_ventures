@@ -349,12 +349,6 @@ const AdminOrders = () => {
                       <span>Subtotal:</span>
                       <span>₵{(selectedOrder.itemsPrice || 0).toFixed(2)}</span>
                     </div>
-                    {selectedOrder.taxPrice > 0 && (
-                      <div className="flex justify-between text-sm">
-                        <span>Tax:</span>
-                        <span>₵{selectedOrder.taxPrice.toFixed(2)}</span>
-                      </div>
-                    )}
                     {selectedOrder.shippingPrice > 0 && (
                       <div className="flex justify-between text-sm">
                         <span>Shipping:</span>

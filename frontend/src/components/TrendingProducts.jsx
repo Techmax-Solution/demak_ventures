@@ -52,7 +52,6 @@ const TrendingProducts = () => {
           <div className="flex items-center justify-between mb-12">
             <div>
               <h2 className="text-4xl font-light text-gray-900 mb-2">Trending Products</h2>
-              <p className="text-gray-600 text-lg">Fashion Is Not Just About Clothes But Also</p>
             </div>
             <Link 
               to="/shop"
@@ -86,7 +85,6 @@ const TrendingProducts = () => {
           <div className="flex items-center justify-between mb-12">
             <div>
               <h2 className="text-4xl font-light text-gray-900 mb-2">Trending Products</h2>
-              <p className="text-gray-600 text-lg">Fashion Is Not Just About Clothes But Also</p>
             </div>
             <Link 
               to="/shop"
@@ -110,7 +108,6 @@ const TrendingProducts = () => {
         <div className="flex items-center justify-between mb-12">
           <div>
             <h2 className="text-4xl font-light text-gray-900 mb-2">Trending Products</h2>
-            <p className="text-gray-600 text-lg">Fashion Is Not Just About Clothes But Also</p>
           </div>
           <Link 
             to="/shop"

@@ -24,28 +24,33 @@ const Footer = () => {
             <h3 className="text-lg font-semibold text-orange-600 mb-6 tracking-wide">EXPLORE</h3>
             <ul className="space-y-4">
               <li>
-                <Link to="/jewellery" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
-                  Jewellery
+                <Link to="/shop?category=men" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
+                  Men
                 </Link>
               </li>
               <li>
-                <Link to="/high-jewellery" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
-                  High Jewellery
+                <Link to="/shop?category=women" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
+                  Women
                 </Link>
               </li>
               <li>
-                <Link to="/wedding-engagement" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
-                  Wedding & Engagement
+                <Link to="/shop?category=kids" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
+                  Kids
                 </Link>
               </li>
               <li>
-                <Link to="/provenance-peace" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
-                  Provenance and Peace
+                <Link to="/shop?category=accessories" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
+                  Accessories
                 </Link>
               </li>
               <li>
-                <Link to="/clocks" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
-                  Clocks
+                <Link to="/shop?category=shoes" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
+                  Shoes
+                </Link>
+              </li>
+              <li>
+                <Link to="/shop?category=bags" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
+                  Bags
                 </Link>
               </li>
             </ul>
@@ -83,33 +88,38 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* ABOUT US Section */}
+          {/* CATEGORIES Section */}
           <div>
-            <h3 className="text-lg font-semibold text-orange-600 mb-6 tracking-wide">ABOUT US</h3>
+            <h3 className="text-lg font-semibold text-orange-600 mb-6 tracking-wide">CATEGORIES</h3>
             <ul className="space-y-4">
               <li>
-                <Link to="/about" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
-                  About Us
+                <Link to="/shop?category=t-shirts" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
+                  T-Shirts
                 </Link>
               </li>
               <li>
-                <Link to="/rewards" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
-                  The Rewards Stack
+                <Link to="/shop?category=shirts" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
+                  Shirts
                 </Link>
               </li>
               <li>
-                <Link to="/sustainability" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
-                  Sustainability
+                <Link to="/shop?category=pants" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
+                  Pants
                 </Link>
               </li>
               <li>
-                <Link to="/careers" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
-                  Careers
+                <Link to="/shop?category=dresses" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
+                  Dresses
                 </Link>
               </li>
               <li>
-                <Link to="/blog" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
-                  Blog
+                <Link to="/shop?category=tops" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
+                  Tops
+                </Link>
+              </li>
+              <li>
+                <Link to="/shop?category=bottoms" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
+                  Bottoms
                 </Link>
               </li>
             </ul>

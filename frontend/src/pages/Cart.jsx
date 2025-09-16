@@ -159,15 +159,11 @@ const Cart = () => {
                   <span>Free</span>
                 </div>
                 
-                <div className="flex justify-between text-gray-600">
-                  <span>Tax:</span>
-                  <span>₵{(totalPrice * 0.08).toFixed(2)}</span>
-                </div>
                 
                 <div className="border-t border-gray-200 pt-3">
                   <div className="flex justify-between text-lg font-semibold text-gray-800">
                     <span>Total:</span>
-                    <span>₵{(totalPrice + totalPrice * 0.08).toFixed(2)}</span>
+                    <span>₵{totalPrice.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
