@@ -25,6 +25,11 @@ const AdminDashboard = () => {
     productsCategory: [],
     salesPerformance: []
   });
+  const [analytics, setAnalytics] = useState({
+    users: { changes: {} },
+    products: { changes: {} },
+    orders: { changes: {} }
+  });
 
   useEffect(() => {
     fetchDashboardData();
@@ -34,11 +39,13 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       
-      // Fetch dashboard statistics
-      const [userStats, orderStats, products] = await Promise.all([
+      // Fetch dashboard statistics and analytics
+      const [userStats, orderStats, userAnalytics, orderAnalytics, productAnalytics] = await Promise.all([
         adminApi.users.getUserStats().catch(() => ({ totalUsers: 0, activeUsers: 0 })),
         adminApi.orders.getOrderStats().catch(() => ({ totalOrders: 0, pendingOrders: 0, completedOrders: 0, totalRevenue: 0, monthlyRevenue: 0 })),
-        adminApi.products.getAllProducts({ limit: 1 }).catch(() => ({ products: [], total: 0 }))
+        adminApi.users.getUserAnalytics().catch(() => ({ changes: {} })),
+        adminApi.orders.getOrderAnalytics().catch(() => ({ changes: {} })),
+        adminApi.products.getProductAnalytics().catch(() => ({ changes: {} }))
       ]);
 
       // Fetch recent orders
@@ -50,8 +57,8 @@ const AdminDashboard = () => {
           active: userStats.activeUsers || 0
         },
         products: {
-          total: products.total || 0,
-          active: products.total || 0
+          total: productAnalytics.current?.totalProducts || 0,
+          active: productAnalytics.current?.activeProducts || 0
         },
         orders: {
           total: orderStats.totalOrders || 0,
@@ -62,6 +69,12 @@ const AdminDashboard = () => {
           total: orderStats.totalRevenue || 0,
           thisMonth: orderStats.monthlyRevenue || 0
         }
+      });
+
+      setAnalytics({
+        users: userAnalytics,
+        products: productAnalytics,
+        orders: orderAnalytics
       });
 
       setRecentOrders(ordersData.orders || []);
@@ -99,7 +112,9 @@ const AdminDashboard = () => {
             value={stats.users.total}
             subtitle={`${stats.users.active} active`}
             color="blue"
-            change={12.5}
+            change={analytics.users.dailyChanges?.totalUsers || 0}
+            changeType="number"
+            changeLabel="users today"
             icon={
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
@@ -112,7 +127,9 @@ const AdminDashboard = () => {
             value={stats.products.total}
             subtitle={`${stats.products.active} active`}
             color="green"
-            change={8.2}
+            change={analytics.products.dailyChanges?.totalProducts || 0}
+            changeType="number"
+            changeLabel="products today"
             icon={
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -125,7 +142,9 @@ const AdminDashboard = () => {
             value={stats.orders.total}
             subtitle={`${stats.orders.pending} pending`}
             color="yellow"
-            change={-2.1}
+            change={analytics.orders.dailyChanges?.orders || 0}
+            changeType="number"
+            changeLabel="orders today"
             icon={
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -138,7 +157,9 @@ const AdminDashboard = () => {
             value={`₵${stats.revenue.total.toLocaleString()}`}
             subtitle={`₵${stats.revenue.thisMonth.toLocaleString()} this month`}
             color="purple"
-            change={18.7}
+            change={analytics.orders.dailyChanges?.revenue || 0}
+            changeType="currency"
+            changeLabel="revenue today"
             icon={
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
@@ -306,9 +327,17 @@ const AdminDashboard = () => {
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Storage</span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                  85% Used
+                <span className="text-sm text-gray-600">Active Users</span>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  {stats.users.active} online
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Pending Orders</span>
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  stats.orders.pending > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
+                }`}>
+                  {stats.orders.pending} pending
                 </span>
               </div>
             </div>
@@ -317,27 +346,33 @@ const AdminDashboard = () => {
           <div className="bg-white shadow rounded-lg p-4 sm:p-6">
             <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Recent Activity</h3>
             <div className="space-y-3 text-sm">
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-blue-400 rounded-full mt-2"></div>
-                <div>
-                  <p className="text-gray-900">New order received</p>
-                  <p className="text-gray-500">2 minutes ago</p>
+              {recentOrders.length > 0 ? (
+                recentOrders.slice(0, 3).map((order, index) => (
+                  <div key={order._id} className="flex items-start space-x-3">
+                    <div className={`w-2 h-2 rounded-full mt-2 ${
+                      order.status === 'delivered' ? 'bg-green-400' :
+                      order.status === 'shipped' ? 'bg-blue-400' :
+                      order.status === 'processing' ? 'bg-yellow-400' :
+                      'bg-gray-400'
+                    }`}></div>
+                    <div>
+                      <p className="text-gray-900">
+                        {order.status === 'delivered' ? 'Order delivered' :
+                         order.status === 'shipped' ? 'Order shipped' :
+                         order.status === 'processing' ? 'Order processing' :
+                         'New order received'}
+                      </p>
+                      <p className="text-gray-500">
+                        {new Date(order.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center text-gray-500 py-4">
+                  No recent activity
                 </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-green-400 rounded-full mt-2"></div>
-                <div>
-                  <p className="text-gray-900">Product updated</p>
-                  <p className="text-gray-500">1 hour ago</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-purple-400 rounded-full mt-2"></div>
-                <div>
-                  <p className="text-gray-900">New user registered</p>
-                  <p className="text-gray-500">3 hours ago</p>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

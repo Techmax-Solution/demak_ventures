@@ -383,3 +383,142 @@ export const updateProductStock = async (req, res) => {
         res.status(400).json({ message: 'Invalid stock data' });
     }
 };
+
+// @desc    Get product analytics for dashboard
+// @route   GET /api/products/analytics
+// @access  Private/Admin
+export const getProductAnalytics = async (req, res) => {
+    try {
+        const now = new Date();
+        const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+        const sixtyDaysAgo = new Date(now.getTime() - (60 * 24 * 60 * 60 * 1000));
+
+        // Current period data (last 30 days)
+        const currentPeriodData = await Product.aggregate([
+            { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+            {
+                $group: {
+                    _id: null,
+                    totalProducts: { $sum: 1 },
+                    activeProducts: { $sum: { $cond: [{ $eq: ['$isActive', true] }, 1, 0] } },
+                    inactiveProducts: { $sum: { $cond: [{ $eq: ['$isActive', false] }, 1, 0] } },
+                    featuredProducts: { $sum: { $cond: [{ $eq: ['$featured', true] }, 1, 0] } },
+                    onSaleProducts: { $sum: { $cond: [{ $eq: ['$onSale', true] }, 1, 0] } },
+                    inStockProducts: { $sum: { $cond: [{ $gt: ['$totalStock', 0] }, 1, 0] } },
+                    outOfStockProducts: { $sum: { $cond: [{ $eq: ['$totalStock', 0] }, 1, 0] } }
+                }
+            }
+        ]);
+
+        // Previous period data (30-60 days ago)
+        const previousPeriodData = await Product.aggregate([
+            { $match: { createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo } } },
+            {
+                $group: {
+                    _id: null,
+                    totalProducts: { $sum: 1 },
+                    activeProducts: { $sum: { $cond: [{ $eq: ['$isActive', true] }, 1, 0] } },
+                    inactiveProducts: { $sum: { $cond: [{ $eq: ['$isActive', false] }, 1, 0] } },
+                    featuredProducts: { $sum: { $cond: [{ $eq: ['$featured', true] }, 1, 0] } },
+                    onSaleProducts: { $sum: { $cond: [{ $eq: ['$onSale', true] }, 1, 0] } },
+                    inStockProducts: { $sum: { $cond: [{ $gt: ['$totalStock', 0] }, 1, 0] } },
+                    outOfStockProducts: { $sum: { $cond: [{ $eq: ['$totalStock', 0] }, 1, 0] } }
+                }
+            }
+        ]);
+
+        const current = currentPeriodData[0] || {
+            totalProducts: 0, activeProducts: 0, inactiveProducts: 0, 
+            featuredProducts: 0, onSaleProducts: 0, inStockProducts: 0, outOfStockProducts: 0
+        };
+
+        const previous = previousPeriodData[0] || {
+            totalProducts: 0, activeProducts: 0, inactiveProducts: 0, 
+            featuredProducts: 0, onSaleProducts: 0, inStockProducts: 0, outOfStockProducts: 0
+        };
+
+        // Calculate daily changes (today vs yesterday)
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0);
+
+        // Get today's data
+        const todayData = await Product.aggregate([
+            { $match: { createdAt: { $gte: today } } },
+            {
+                $group: {
+                    _id: null,
+                    totalProducts: { $sum: 1 },
+                    activeProducts: { $sum: { $cond: [{ $eq: ['$isActive', true] }, 1, 0] } },
+                    inactiveProducts: { $sum: { $cond: [{ $eq: ['$isActive', false] }, 1, 0] } },
+                    featuredProducts: { $sum: { $cond: [{ $eq: ['$featured', true] }, 1, 0] } },
+                    onSaleProducts: { $sum: { $cond: [{ $eq: ['$onSale', true] }, 1, 0] } },
+                    inStockProducts: { $sum: { $cond: [{ $gt: ['$totalStock', 0] }, 1, 0] } },
+                    outOfStockProducts: { $sum: { $cond: [{ $eq: ['$totalStock', 0] }, 1, 0] } }
+                }
+            }
+        ]);
+
+        // Get yesterday's data
+        const yesterdayData = await Product.aggregate([
+            { $match: { createdAt: { $gte: yesterday, $lt: today } } },
+            {
+                $group: {
+                    _id: null,
+                    totalProducts: { $sum: 1 },
+                    activeProducts: { $sum: { $cond: [{ $eq: ['$isActive', true] }, 1, 0] } },
+                    inactiveProducts: { $sum: { $cond: [{ $eq: ['$isActive', false] }, 1, 0] } },
+                    featuredProducts: { $sum: { $cond: [{ $eq: ['$featured', true] }, 1, 0] } },
+                    onSaleProducts: { $sum: { $cond: [{ $eq: ['$onSale', true] }, 1, 0] } },
+                    inStockProducts: { $sum: { $cond: [{ $gt: ['$totalStock', 0] }, 1, 0] } },
+                    outOfStockProducts: { $sum: { $cond: [{ $eq: ['$totalStock', 0] }, 1, 0] } }
+                }
+            }
+        ]);
+
+        const todayStats = todayData[0] || {
+            totalProducts: 0, activeProducts: 0, inactiveProducts: 0, 
+            featuredProducts: 0, onSaleProducts: 0, inStockProducts: 0, outOfStockProducts: 0
+        };
+
+        const yesterdayStats = yesterdayData[0] || {
+            totalProducts: 0, activeProducts: 0, inactiveProducts: 0, 
+            featuredProducts: 0, onSaleProducts: 0, inStockProducts: 0, outOfStockProducts: 0
+        };
+
+        res.json({
+            current: {
+                totalProducts: current.totalProducts,
+                activeProducts: current.activeProducts,
+                inactiveProducts: current.inactiveProducts,
+                featuredProducts: current.featuredProducts,
+                onSaleProducts: current.onSaleProducts,
+                inStockProducts: current.inStockProducts,
+                outOfStockProducts: current.outOfStockProducts
+            },
+            previous: {
+                totalProducts: previous.totalProducts,
+                activeProducts: previous.activeProducts,
+                inactiveProducts: previous.inactiveProducts,
+                featuredProducts: previous.featuredProducts,
+                onSaleProducts: previous.onSaleProducts,
+                inStockProducts: previous.inStockProducts,
+                outOfStockProducts: previous.outOfStockProducts
+            },
+            dailyChanges: {
+                totalProducts: todayStats.totalProducts - yesterdayStats.totalProducts,
+                activeProducts: todayStats.activeProducts - yesterdayStats.activeProducts,
+                inactiveProducts: todayStats.inactiveProducts - yesterdayStats.inactiveProducts,
+                featuredProducts: todayStats.featuredProducts - yesterdayStats.featuredProducts,
+                onSaleProducts: todayStats.onSaleProducts - yesterdayStats.onSaleProducts,
+                inStockProducts: todayStats.inStockProducts - yesterdayStats.inStockProducts,
+                outOfStockProducts: todayStats.outOfStockProducts - yesterdayStats.outOfStockProducts
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};

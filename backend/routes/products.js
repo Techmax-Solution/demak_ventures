@@ -9,7 +9,8 @@ import {
     getTopProducts,
     getNewestProducts,
     getProductFilters,
-    updateProductStock
+    updateProductStock,
+    getProductAnalytics
 } from '../controllers/productController.js';
 import { protect, admin } from '../middleware/auth.js';
 
@@ -20,15 +21,18 @@ router.get('/', getProducts);
 router.get('/top', getTopProducts);
 router.get('/newest', getNewestProducts);
 router.get('/filters', getProductFilters);
-router.get('/:id', getProductById);
+
+// Admin routes (specific routes before parameterized ones)
+router.get('/analytics', protect, admin, getProductAnalytics);
+router.post('/', protect, admin, createProduct);
 
 // Protected routes
 router.post('/:id/reviews', protect, createProductReview);
-
-// Admin routes
-router.post('/', protect, admin, createProduct);
 router.put('/:id', protect, admin, updateProduct);
 router.delete('/:id', protect, admin, deleteProduct);
 router.put('/:id/stock', protect, admin, updateProductStock);
+
+// Parameterized routes (must be last)
+router.get('/:id', getProductById);
 
 export default router;

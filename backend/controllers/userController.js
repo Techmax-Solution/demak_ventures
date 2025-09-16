@@ -165,3 +165,124 @@ export const getUserStats = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+// @desc    Get user analytics for dashboard
+// @route   GET /api/users/analytics
+// @access  Private/Admin
+export const getUserAnalytics = async (req, res) => {
+    try {
+        const now = new Date();
+        const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+        const sixtyDaysAgo = new Date(now.getTime() - (60 * 24 * 60 * 60 * 1000));
+
+        // Current period data (last 30 days)
+        const currentPeriodData = await User.aggregate([
+            { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+            {
+                $group: {
+                    _id: null,
+                    totalUsers: { $sum: 1 },
+                    activeUsers: { $sum: { $cond: [{ $eq: ['$isActive', true] }, 1, 0] } },
+                    inactiveUsers: { $sum: { $cond: [{ $eq: ['$isActive', false] }, 1, 0] } },
+                    adminUsers: { $sum: { $cond: [{ $eq: ['$role', 'admin'] }, 1, 0] } },
+                    regularUsers: { $sum: { $cond: [{ $eq: ['$role', 'user'] }, 1, 0] } }
+                }
+            }
+        ]);
+
+        // Previous period data (30-60 days ago)
+        const previousPeriodData = await User.aggregate([
+            { $match: { createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo } } },
+            {
+                $group: {
+                    _id: null,
+                    totalUsers: { $sum: 1 },
+                    activeUsers: { $sum: { $cond: [{ $eq: ['$isActive', true] }, 1, 0] } },
+                    inactiveUsers: { $sum: { $cond: [{ $eq: ['$isActive', false] }, 1, 0] } },
+                    adminUsers: { $sum: { $cond: [{ $eq: ['$role', 'admin'] }, 1, 0] } },
+                    regularUsers: { $sum: { $cond: [{ $eq: ['$role', 'user'] }, 1, 0] } }
+                }
+            }
+        ]);
+
+        const current = currentPeriodData[0] || {
+            totalUsers: 0, activeUsers: 0, inactiveUsers: 0, adminUsers: 0, regularUsers: 0
+        };
+
+        const previous = previousPeriodData[0] || {
+            totalUsers: 0, activeUsers: 0, inactiveUsers: 0, adminUsers: 0, regularUsers: 0
+        };
+
+        // Calculate daily changes (today vs yesterday)
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0);
+
+        // Get today's data
+        const todayData = await User.aggregate([
+            { $match: { createdAt: { $gte: today } } },
+            {
+                $group: {
+                    _id: null,
+                    totalUsers: { $sum: 1 },
+                    activeUsers: { $sum: { $cond: [{ $eq: ['$isActive', true] }, 1, 0] } },
+                    inactiveUsers: { $sum: { $cond: [{ $eq: ['$isActive', false] }, 1, 0] } },
+                    adminUsers: { $sum: { $cond: [{ $eq: ['$role', 'admin'] }, 1, 0] } },
+                    regularUsers: { $sum: { $cond: [{ $eq: ['$role', 'user'] }, 1, 0] } }
+                }
+            }
+        ]);
+
+        // Get yesterday's data
+        const yesterdayData = await User.aggregate([
+            { $match: { createdAt: { $gte: yesterday, $lt: today } } },
+            {
+                $group: {
+                    _id: null,
+                    totalUsers: { $sum: 1 },
+                    activeUsers: { $sum: { $cond: [{ $eq: ['$isActive', true] }, 1, 0] } },
+                    inactiveUsers: { $sum: { $cond: [{ $eq: ['$isActive', false] }, 1, 0] } },
+                    adminUsers: { $sum: { $cond: [{ $eq: ['$role', 'admin'] }, 1, 0] } },
+                    regularUsers: { $sum: { $cond: [{ $eq: ['$role', 'user'] }, 1, 0] } }
+                }
+            }
+        ]);
+
+        const todayStats = todayData[0] || {
+            totalUsers: 0, activeUsers: 0, inactiveUsers: 0, adminUsers: 0, regularUsers: 0
+        };
+
+        const yesterdayStats = yesterdayData[0] || {
+            totalUsers: 0, activeUsers: 0, inactiveUsers: 0, adminUsers: 0, regularUsers: 0
+        };
+
+        res.json({
+            current: {
+                totalUsers: current.totalUsers,
+                activeUsers: current.activeUsers,
+                inactiveUsers: current.inactiveUsers,
+                adminUsers: current.adminUsers,
+                regularUsers: current.regularUsers
+            },
+            previous: {
+                totalUsers: previous.totalUsers,
+                activeUsers: previous.activeUsers,
+                inactiveUsers: previous.inactiveUsers,
+                adminUsers: previous.adminUsers,
+                regularUsers: previous.regularUsers
+            },
+            dailyChanges: {
+                totalUsers: todayStats.totalUsers - yesterdayStats.totalUsers,
+                activeUsers: todayStats.activeUsers - yesterdayStats.activeUsers,
+                inactiveUsers: todayStats.inactiveUsers - yesterdayStats.inactiveUsers,
+                adminUsers: todayStats.adminUsers - yesterdayStats.adminUsers,
+                regularUsers: todayStats.regularUsers - yesterdayStats.regularUsers
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};

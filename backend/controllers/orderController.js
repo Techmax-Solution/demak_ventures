@@ -368,6 +368,21 @@ export const getOrderStats = async (req, res) => {
         ]);
         const totalRevenue = revenueResult[0]?.totalRevenue || 0;
 
+        // Calculate monthly revenue (current month)
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const monthlyRevenueResult = await Order.aggregate([
+            { 
+                $match: { 
+                    isPaid: true, 
+                    status: { $ne: 'cancelled' },
+                    createdAt: { $gte: startOfMonth }
+                } 
+            },
+            { $group: { _id: null, monthlyRevenue: { $sum: '$totalPrice' } } }
+        ]);
+        const monthlyRevenue = monthlyRevenueResult[0]?.monthlyRevenue || 0;
+
         // Get orders from last 30 days
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -383,7 +398,178 @@ export const getOrderStats = async (req, res) => {
             deliveredOrders,
             cancelledOrders,
             totalRevenue,
+            monthlyRevenue,
             recentOrders
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// @desc    Get dashboard analytics data
+// @route   GET /api/orders/analytics
+// @access  Private/Admin
+export const getDashboardAnalytics = async (req, res) => {
+    try {
+        const now = new Date();
+        const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+        const sixtyDaysAgo = new Date(now.getTime() - (60 * 24 * 60 * 60 * 1000));
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+
+        // Current period data (last 30 days)
+        const currentPeriodData = await Order.aggregate([
+            { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+            {
+                $group: {
+                    _id: null,
+                    totalOrders: { $sum: 1 },
+                    totalRevenue: { $sum: { $cond: [{ $and: [{ $eq: ['$isPaid', true] }, { $ne: ['$status', 'cancelled'] }] }, '$totalPrice', 0] } },
+                    pendingOrders: { $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] } },
+                    processingOrders: { $sum: { $cond: [{ $eq: ['$status', 'processing'] }, 1, 0] } },
+                    shippedOrders: { $sum: { $cond: [{ $eq: ['$status', 'shipped'] }, 1, 0] } },
+                    deliveredOrders: { $sum: { $cond: [{ $eq: ['$status', 'delivered'] }, 1, 0] } },
+                    cancelledOrders: { $sum: { $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0] } }
+                }
+            }
+        ]);
+
+        // Previous period data (30-60 days ago)
+        const previousPeriodData = await Order.aggregate([
+            { $match: { createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo } } },
+            {
+                $group: {
+                    _id: null,
+                    totalOrders: { $sum: 1 },
+                    totalRevenue: { $sum: { $cond: [{ $and: [{ $eq: ['$isPaid', true] }, { $ne: ['$status', 'cancelled'] }] }, '$totalPrice', 0] } },
+                    pendingOrders: { $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] } },
+                    processingOrders: { $sum: { $cond: [{ $eq: ['$status', 'processing'] }, 1, 0] } },
+                    shippedOrders: { $sum: { $cond: [{ $eq: ['$status', 'shipped'] }, 1, 0] } },
+                    deliveredOrders: { $sum: { $cond: [{ $eq: ['$status', 'delivered'] }, 1, 0] } },
+                    cancelledOrders: { $sum: { $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0] } }
+                }
+            }
+        ]);
+
+        // Monthly revenue comparison
+        const currentMonthRevenue = await Order.aggregate([
+            { 
+                $match: { 
+                    isPaid: true, 
+                    status: { $ne: 'cancelled' },
+                    createdAt: { $gte: startOfMonth }
+                } 
+            },
+            { $group: { _id: null, revenue: { $sum: '$totalPrice' } } }
+        ]);
+
+        const lastMonthRevenue = await Order.aggregate([
+            { 
+                $match: { 
+                    isPaid: true, 
+                    status: { $ne: 'cancelled' },
+                    createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth }
+                } 
+            },
+            { $group: { _id: null, revenue: { $sum: '$totalPrice' } } }
+        ]);
+
+        const current = currentPeriodData[0] || {
+            totalOrders: 0, totalRevenue: 0, pendingOrders: 0, 
+            processingOrders: 0, shippedOrders: 0, deliveredOrders: 0, cancelledOrders: 0
+        };
+
+        const previous = previousPeriodData[0] || {
+            totalOrders: 0, totalRevenue: 0, pendingOrders: 0, 
+            processingOrders: 0, shippedOrders: 0, deliveredOrders: 0, cancelledOrders: 0
+        };
+
+        const currentMonthRev = currentMonthRevenue[0]?.revenue || 0;
+        const lastMonthRev = lastMonthRevenue[0]?.revenue || 0;
+
+        // Calculate daily changes (today vs yesterday)
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0);
+
+        // Get today's data
+        const todayData = await Order.aggregate([
+            { $match: { createdAt: { $gte: today } } },
+            {
+                $group: {
+                    _id: null,
+                    totalOrders: { $sum: 1 },
+                    totalRevenue: { $sum: { $cond: [{ $and: [{ $eq: ['$isPaid', true] }, { $ne: ['$status', 'cancelled'] }] }, '$totalPrice', 0] } },
+                    pendingOrders: { $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] } },
+                    processingOrders: { $sum: { $cond: [{ $eq: ['$status', 'processing'] }, 1, 0] } },
+                    shippedOrders: { $sum: { $cond: [{ $eq: ['$status', 'shipped'] }, 1, 0] } },
+                    deliveredOrders: { $sum: { $cond: [{ $eq: ['$status', 'delivered'] }, 1, 0] } },
+                    cancelledOrders: { $sum: { $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0] } }
+                }
+            }
+        ]);
+
+        // Get yesterday's data
+        const yesterdayData = await Order.aggregate([
+            { $match: { createdAt: { $gte: yesterday, $lt: today } } },
+            {
+                $group: {
+                    _id: null,
+                    totalOrders: { $sum: 1 },
+                    totalRevenue: { $sum: { $cond: [{ $and: [{ $eq: ['$isPaid', true] }, { $ne: ['$status', 'cancelled'] }] }, '$totalPrice', 0] } },
+                    pendingOrders: { $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] } },
+                    processingOrders: { $sum: { $cond: [{ $eq: ['$status', 'processing'] }, 1, 0] } },
+                    shippedOrders: { $sum: { $cond: [{ $eq: ['$status', 'shipped'] }, 1, 0] } },
+                    deliveredOrders: { $sum: { $cond: [{ $eq: ['$status', 'delivered'] }, 1, 0] } },
+                    cancelledOrders: { $sum: { $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0] } }
+                }
+            }
+        ]);
+
+        const todayStats = todayData[0] || {
+            totalOrders: 0, totalRevenue: 0, pendingOrders: 0, 
+            processingOrders: 0, shippedOrders: 0, deliveredOrders: 0, cancelledOrders: 0
+        };
+
+        const yesterdayStats = yesterdayData[0] || {
+            totalOrders: 0, totalRevenue: 0, pendingOrders: 0, 
+            processingOrders: 0, shippedOrders: 0, deliveredOrders: 0, cancelledOrders: 0
+        };
+
+        res.json({
+            current: {
+                totalOrders: current.totalOrders,
+                totalRevenue: current.totalRevenue,
+                pendingOrders: current.pendingOrders,
+                processingOrders: current.processingOrders,
+                shippedOrders: current.shippedOrders,
+                deliveredOrders: current.deliveredOrders,
+                cancelledOrders: current.cancelledOrders,
+                monthlyRevenue: currentMonthRev
+            },
+            previous: {
+                totalOrders: previous.totalOrders,
+                totalRevenue: previous.totalRevenue,
+                pendingOrders: previous.pendingOrders,
+                processingOrders: previous.processingOrders,
+                shippedOrders: previous.shippedOrders,
+                deliveredOrders: previous.deliveredOrders,
+                cancelledOrders: previous.cancelledOrders,
+                monthlyRevenue: lastMonthRev
+            },
+            dailyChanges: {
+                orders: todayStats.totalOrders - yesterdayStats.totalOrders,
+                revenue: todayStats.totalRevenue - yesterdayStats.totalRevenue,
+                pending: todayStats.pendingOrders - yesterdayStats.pendingOrders,
+                processing: todayStats.processingOrders - yesterdayStats.processingOrders,
+                shipped: todayStats.shippedOrders - yesterdayStats.shippedOrders,
+                delivered: todayStats.deliveredOrders - yesterdayStats.deliveredOrders,
+                cancelled: todayStats.cancelledOrders - yesterdayStats.cancelledOrders
+            }
         });
     } catch (error) {
         console.error(error);

@@ -222,13 +222,28 @@ export const ProductsCategoryChart = ({ data = [] }) => {
 };
 
 // Compact Stat Card with Mini Chart
-export const StatCardWithChart = ({ title, value, subtitle, icon, color = 'blue', trend = [], change }) => {
+export const StatCardWithChart = ({ title, value, subtitle, icon, color = 'blue', trend = [], change, changeType = 'percentage', changeLabel = '' }) => {
   const trendData = trend.length > 0 ? trend : [
     { value: 20 }, { value: 25 }, { value: 22 }, { value: 30 }, { value: 28 }, { value: 35 }, { value: value }
   ];
 
   const isPositive = change && change > 0;
   const isNegative = change && change < 0;
+
+  const formatChange = () => {
+    if (change === undefined || change === null) return '';
+    
+    const prefix = isPositive ? '+' : isNegative ? '-' : '';
+    const absValue = Math.abs(change);
+    
+    if (changeType === 'currency') {
+      return `${prefix}₵${absValue.toLocaleString()}`;
+    } else if (changeType === 'number') {
+      return `${prefix}${absValue}`;
+    } else {
+      return `${prefix}${absValue}%`;
+    }
+  };
 
   return (
     <div className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow">
@@ -260,11 +275,14 @@ export const StatCardWithChart = ({ title, value, subtitle, icon, color = 'blue'
                 </LineChart>
               </ResponsiveContainer>
             </div>
-            {change && (
+            {change !== undefined && change !== null && (
               <div className={`flex items-center text-xs ${
                 isPositive ? 'text-green-600' : isNegative ? 'text-red-600' : 'text-gray-500'
               }`}>
-                {isPositive ? '↗' : isNegative ? '↘' : '→'} {Math.abs(change)}%
+                <span className="flex items-center">
+                  {isPositive ? '↗' : isNegative ? '↘' : '→'} {formatChange()}
+                  {changeLabel && <span className="ml-1 text-gray-500">today</span>}
+                </span>
               </div>
             )}
           </div>

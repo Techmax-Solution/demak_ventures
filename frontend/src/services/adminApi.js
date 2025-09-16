@@ -62,6 +62,17 @@ export const adminProductsAPI = {
       console.error('Error uploading image:', error);
       throw error;
     }
+  },
+
+  // Get product analytics
+  getProductAnalytics: async () => {
+    try {
+      const response = await api.get('/products/analytics');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching product analytics:', error);
+      throw error;
+    }
   }
 };
 
@@ -204,6 +215,17 @@ export const adminUsersAPI = {
       console.error('Error fetching user stats:', error);
       throw error;
     }
+  },
+
+  // Get user analytics
+  getUserAnalytics: async () => {
+    try {
+      const response = await api.get('/users/analytics');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching user analytics:', error);
+      throw error;
+    }
   }
 };
 
@@ -249,6 +271,17 @@ export const adminOrdersAPI = {
       return response.data;
     } catch (error) {
       console.error('Error fetching order stats:', error);
+      throw error;
+    }
+  },
+
+  // Get order analytics
+  getOrderAnalytics: async () => {
+    try {
+      const response = await api.get('/orders/analytics');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching order analytics:', error);
       throw error;
     }
   }
