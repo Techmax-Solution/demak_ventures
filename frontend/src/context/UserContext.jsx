@@ -249,15 +249,13 @@ export const UserProvider = ({ children }) => {
       console.log('📝 Registering user...');
       const response = await authAPI.register(userData);
       
-      // Set expiration time to 7 days from now (longer persistence)
-      const expirationTime = new Date().getTime() + (7 * 24 * 60 * 60 * 1000); // 7 days in milliseconds
+      console.log('✅ Registration successful, user needs to verify email');
+      console.log('📋 Registration response:', response);
       
-      console.log('✅ Registration successful, storing comprehensive auth data');
-      // Use SessionManager for comprehensive data storage
-      SessionManager.saveUserSession(response, response.token, expirationTime);
-      
-      setUserWithTracking(response, 'register-success');
-      setIsAuthenticated(true);
+      // Don't set user as authenticated or store session data
+      // User needs to verify email first
+      setUserWithTracking(null, 'register-success-no-verification');
+      setIsAuthenticated(false);
       setLoading(false);
       setInitialized(true);
       

@@ -36,6 +36,13 @@ export const protect = async (req, res, next) => {
                 return res.status(401).json({ message: 'Account is deactivated' });
             }
 
+            if (!req.user.isVerified) {
+                console.log('❌ User email not verified');
+                return res.status(401).json({ 
+                    message: 'Please verify your email before continuing. Check your inbox for the verification email.' 
+                });
+            }
+
             console.log('✅ Auth middleware passed');
             next();
         } catch (error) {

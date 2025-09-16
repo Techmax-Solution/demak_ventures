@@ -200,9 +200,24 @@ const Register = () => {
     try {
       // Remove confirmPassword before sending to API
       const { confirmPassword, ...userData } = formData;
-      await register(userData);
-      // Redirect to the page they were trying to access or home
-      navigate(from, { replace: true });
+      const response = await register(userData);
+      
+      // Show success message about email verification
+      setErrors({ 
+        submit: 'success',
+        message: response.message || 'Account created successfully! Please check your email and verify your account before logging in.' 
+      });
+      
+      // Clear the form
+      setFormData({
+        name: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
+      });
+      setFieldTouched({});
+      setPasswordStrength({ score: 0, feedback: '' });
+      
     } catch (error) {
       console.error('Registration error:', error);
       const errorMessage = error.response?.data?.message || 'Registration failed. Please try again.';
@@ -258,11 +273,32 @@ const Register = () => {
         <div className="bg-white py-10 px-6 shadow-xl rounded-2xl border border-gray-100">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {errors.submit && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
-                <svg className="h-5 w-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {errors.submit}
+              <div className={`px-4 py-3 rounded-lg ${
+                errors.submit === 'success' 
+                  ? 'bg-green-50 border border-green-200 text-green-700'
+                  : 'bg-red-50 border border-red-200 text-red-700'
+              }`}>
+                <div className="flex items-center">
+                  {errors.submit === 'success' ? (
+                    <svg className="h-5 w-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <svg className="h-5 w-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  )}
+                  <div>
+                    <p>{errors.submit === 'success' ? errors.message : errors.submit}</p>
+                    {errors.submit === 'success' && (
+                      <p className="text-sm mt-1">
+                        <Link to="/login" className="text-green-600 hover:text-green-700 font-medium underline">
+                          Go to Login
+                        </Link>
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 
