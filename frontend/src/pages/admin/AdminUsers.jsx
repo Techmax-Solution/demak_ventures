@@ -97,7 +97,7 @@ const AdminUsers = () => {
       key: 'avatar',
       title: 'Avatar',
       render: (avatar, user) => (
-        <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+        <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
           {avatar ? (
             <img src={avatar} alt={user.name} className="w-10 h-10 rounded-full object-cover" />
           ) : (
@@ -209,7 +209,7 @@ const AdminUsers = () => {
             <div className="space-y-6">
               {/* User Profile */}
               <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
+                <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center">
                   {selectedUser.avatar ? (
                     <img 
                       src={selectedUser.avatar} 
@@ -281,7 +281,7 @@ const AdminUsers = () => {
                 <h4 className="text-sm font-medium text-gray-900 mb-3">Account Statistics</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="bg-blue-50 p-3 rounded-lg">
-                    <div className="text-sm text-blue-600 font-medium">Total Orders</div>
+                    <div className="text-sm text-orange-500 font-medium">Total Orders</div>
                     <div className="text-2xl font-bold text-blue-900">0</div>
                   </div>
                   <div className="bg-green-50 p-3 rounded-lg">
@@ -395,7 +395,7 @@ const AdminUsers = () => {
                 name="isActive"
                 checked={formData.isActive}
                 onChange={handleInputChange}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-orange-500 focus:ring-orange-500"
               />
               <label className="ml-2 text-sm text-gray-700">
                 Active Account

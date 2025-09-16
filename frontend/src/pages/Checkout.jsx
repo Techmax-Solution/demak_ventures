@@ -548,7 +548,7 @@ const Checkout = () => {
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
               <div>
                 <h3 className="font-semibold text-blue-800">Payment in Progress</h3>
-                <p className="text-blue-600">Complete your payment in the Paystack popup to finish your order.</p>
+                <p className="text-orange-500">Complete your payment in the Paystack popup to finish your order.</p>
               </div>
             </div>
           </div>
@@ -719,7 +719,7 @@ const Checkout = () => {
                 className={`w-full py-4 px-6 rounded-lg font-medium text-lg transition-colors duration-200 ${
                   isSubmitting || paymentStep === 'payment'
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-orange-500 hover:bg-orange-600 text-white'
                 }`}
               >
                 {isSubmitting ? 'Processing Order...' : 

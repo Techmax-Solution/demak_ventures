@@ -306,7 +306,7 @@ const AdminProducts = () => {
           <div className="flex-shrink-0">
             <button
               onClick={handleCreate}
-              className="inline-flex items-center px-3 sm:px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full sm:w-auto justify-center"
+              className="inline-flex items-center px-3 sm:px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 w-full sm:w-auto justify-center"
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -498,7 +498,7 @@ const AdminProducts = () => {
               <button
                 type="button"
                 onClick={addSize}
-                className="text-blue-600 hover:text-blue-800 text-sm"
+                className="text-orange-500 hover:text-orange-700 text-sm"
               >
                 + Add Size
               </button>
@@ -540,7 +540,7 @@ const AdminProducts = () => {
               <button
                 type="button"
                 onClick={addColor}
-                className="text-blue-600 hover:text-blue-800 text-sm"
+                className="text-orange-500 hover:text-orange-700 text-sm"
               >
                 + Add Color
               </button>
@@ -614,7 +614,7 @@ const AdminProducts = () => {
               <button
                 type="button"
                 onClick={addImage}
-                className="text-blue-600 hover:text-blue-800 text-sm"
+                className="text-orange-500 hover:text-orange-700 text-sm"
               >
                 + Add Image URL Manually
               </button>
@@ -672,7 +672,7 @@ const AdminProducts = () => {
                   name="featured"
                   checked={formData.featured}
                   onChange={handleInputChange}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-orange-500 focus:ring-orange-500"
                 />
                 <span className="ml-2 text-sm text-gray-700">Featured Product</span>
               </label>
@@ -682,7 +682,7 @@ const AdminProducts = () => {
                   name="onSale"
                   checked={formData.onSale}
                   onChange={handleInputChange}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-orange-500 focus:ring-orange-500"
                 />
                 <span className="ml-2 text-sm text-gray-700">On Sale</span>
               </label>

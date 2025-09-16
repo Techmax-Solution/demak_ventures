@@ -14,37 +14,37 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-white border-t border-gray-200">
+    <footer className="bg-orange-50 border-t border-orange-100">
       {/* Main Footer Content */}
       <div className="container mx-auto px-4 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           
           {/* EXPLORE Section */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-6 tracking-wide">EXPLORE</h3>
+            <h3 className="text-lg font-semibold text-orange-600 mb-6 tracking-wide">EXPLORE</h3>
             <ul className="space-y-4">
               <li>
-                <Link to="/jewellery" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+                <Link to="/jewellery" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
                   Jewellery
                 </Link>
               </li>
               <li>
-                <Link to="/high-jewellery" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+                <Link to="/high-jewellery" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
                   High Jewellery
                 </Link>
               </li>
               <li>
-                <Link to="/wedding-engagement" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+                <Link to="/wedding-engagement" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
                   Wedding & Engagement
                 </Link>
               </li>
               <li>
-                <Link to="/provenance-peace" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+                <Link to="/provenance-peace" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
                   Provenance and Peace
                 </Link>
               </li>
               <li>
-                <Link to="/clocks" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+                <Link to="/clocks" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
                   Clocks
                 </Link>
               </li>
@@ -53,30 +53,30 @@ const Footer = () => {
 
           {/* FOLLOW US Section */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-6 tracking-wide">FOLLOW US</h3>
+            <h3 className="text-lg font-semibold text-orange-600 mb-6 tracking-wide">FOLLOW US</h3>
             <ul className="space-y-4">
               <li>
-                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
                   Facebook
                 </a>
               </li>
               <li>
-                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
                   Twitter
                 </a>
               </li>
               <li>
-                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
                   Instagram
                 </a>
               </li>
               <li>
-                <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+                <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
                   YouTube
                 </a>
               </li>
               <li>
-                <a href="https://pinterest.com" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+                <a href="https://pinterest.com" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
                   Pinterest
                 </a>
               </li>
@@ -85,30 +85,30 @@ const Footer = () => {
 
           {/* ABOUT US Section */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-6 tracking-wide">ABOUT US</h3>
+            <h3 className="text-lg font-semibold text-orange-600 mb-6 tracking-wide">ABOUT US</h3>
             <ul className="space-y-4">
               <li>
-                <Link to="/about" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+                <Link to="/about" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link to="/rewards" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+                <Link to="/rewards" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
                   The Rewards Stack
                 </Link>
               </li>
               <li>
-                <Link to="/sustainability" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+                <Link to="/sustainability" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
                   Sustainability
                 </Link>
               </li>
               <li>
-                <Link to="/careers" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+                <Link to="/careers" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
                   Careers
                 </Link>
               </li>
               <li>
-                <Link to="/blog" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+                <Link to="/blog" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
                   Blog
                 </Link>
               </li>
@@ -117,7 +117,7 @@ const Footer = () => {
 
           {/* OUR NEWSLETTER Section */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-6 tracking-wide">OUR NEWSLETTER</h3>
+            <h3 className="text-lg font-semibold text-orange-600 mb-6 tracking-wide">OUR NEWSLETTER</h3>
             <p className="text-gray-600 mb-6 leading-relaxed">
               It only takes a second to be the first to find out about our latest news
             </p>
@@ -127,12 +127,12 @@ const Footer = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Your Email..."
-                className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-gray-500 transition-colors duration-200"
+                className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-colors duration-200"
                 required
               />
               <button
                 type="submit"
-                className="w-full bg-black text-white py-3 px-6 font-medium hover:bg-gray-800 transition-colors duration-200 tracking-wide uppercase"
+                className="w-full bg-orange-100 text-orange-600 py-3 px-6 font-medium hover:bg-orange-200 transition-colors duration-200 tracking-wide uppercase"
               >
                 SUBSCRIBE
               </button>
@@ -142,7 +142,7 @@ const Footer = () => {
       </div>
 
       {/* Bottom Footer */}
-      <div className="border-t border-gray-200 py-8">
+      <div className="border-t border-orange-100 py-8">
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
             
@@ -153,7 +153,7 @@ const Footer = () => {
 
             {/* Brand Name */}
             <div className="text-center">
-              <h2 className="text-2xl font-light tracking-wider text-gray-900">Demak.</h2>
+              <h2 className="text-2xl font-light tracking-wider text-orange-600">Demak.</h2>
             </div>
 
             {/* Payment Icons */}
@@ -198,7 +198,7 @@ const Footer = () => {
       {/* Back to Top Button */}
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="fixed bottom-6 right-6 w-12 h-12 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors duration-200 shadow-lg"
+        className="fixed bottom-6 right-6 w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center hover:bg-orange-200 transition-colors duration-200 shadow-lg"
         aria-label="Back to top"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

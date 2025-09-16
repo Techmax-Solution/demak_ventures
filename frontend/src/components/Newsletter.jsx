@@ -48,7 +48,7 @@ const Newsletter = () => {
                   />
                   <button
                     type="submit"
-                    className="px-6 py-3 sm:px-8 sm:py-4 bg-gray-900 text-white font-medium hover:bg-gray-800 transition-colors duration-300 text-xs sm:text-sm tracking-wider uppercase w-full sm:w-auto"
+                    className="px-6 py-3 sm:px-8 sm:py-4 bg-orange-100 text-orange-600 font-medium hover:bg-orange-200 transition-colors duration-300 text-xs sm:text-sm tracking-wider uppercase w-full sm:w-auto"
                   >
                     SUBSCRIBE
                   </button>
@@ -56,7 +56,7 @@ const Newsletter = () => {
                 
                 {/* Success Message */}
                 {isSubscribed && (
-                  <div className="text-green-600 text-sm font-medium">
+                  <div className="text-orange-500 text-sm font-medium">
                     ✓ Thank you for subscribing to our newsletter!
                   </div>
                 )}

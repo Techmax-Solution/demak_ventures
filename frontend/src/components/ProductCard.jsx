@@ -64,7 +64,7 @@ const ProductCard = memo(({ product }) => {
 
       <div className="p-4">
         <Link to={`/product/${product._id}`} className="block">
-          <h3 className="text-lg font-semibold text-gray-800 mb-2 hover:text-blue-600 transition-colors duration-200">
+          <h3 className="text-lg font-semibold text-gray-800 mb-2 hover:text-orange-600 transition-colors duration-200">
             {product.name}
           </h3>
           <p className="text-gray-600 text-sm mb-2 capitalize">{product.category?.name}</p>
@@ -77,7 +77,7 @@ const ProductCard = memo(({ product }) => {
           <div className="flex items-center space-x-2">
             {product.originalPrice && product.originalPrice > product.price ? (
               <>
-                <span className="text-lg font-bold text-blue-600">₵{product.price}</span>
+                <span className="text-lg font-bold text-orange-600">₵{product.price}</span>
                 <span className="text-sm text-gray-500 line-through">₵{product.originalPrice}</span>
               </>
             ) : (
@@ -90,7 +90,7 @@ const ProductCard = memo(({ product }) => {
             disabled={product.totalStock === 0}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
               product.totalStock > 0
-                ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                ? 'bg-orange-100 hover:bg-orange-200 text-orange-600'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}
           >

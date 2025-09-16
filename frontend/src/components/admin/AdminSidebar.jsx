@@ -102,11 +102,11 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
                 to={item.href}
                 className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
                   isCurrentPath(item.href)
-                    ? 'bg-blue-100 text-blue-900 border-r-2 border-blue-600'
+                    ? 'bg-orange-100 text-orange-900 border-r-2 border-orange-500'
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                 }`}
               >
-                <span className={`mr-3 ${isCurrentPath(item.href) ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-500'}`}>
+                <span className={`mr-3 ${isCurrentPath(item.href) ? 'text-orange-500' : 'text-gray-400 group-hover:text-gray-500'}`}>
                   {item.icon}
                 </span>
                 {item.name}
@@ -118,7 +118,7 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
           <div className="px-4 py-4 border-t border-gray-200">
             <div className="flex items-center mb-3">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
                   <span className="text-sm font-medium text-white">
                     {user?.name?.charAt(0)?.toUpperCase() || 'A'}
                   </span>

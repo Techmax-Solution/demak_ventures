@@ -56,7 +56,7 @@ const TrendingProducts = () => {
             </div>
             <Link 
               to="/shop"
-              className="px-8 py-3 border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors duration-200 text-sm tracking-wide uppercase"
+              className="px-8 py-3 border border-orange-300 text-orange-600 font-medium hover:bg-orange-100 hover:text-orange-700 transition-colors duration-200 text-sm tracking-wide uppercase"
             >
               VIEW ALL
             </Link>
@@ -90,7 +90,7 @@ const TrendingProducts = () => {
             </div>
             <Link 
               to="/shop"
-              className="px-8 py-3 border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors duration-200 text-sm tracking-wide uppercase"
+              className="px-8 py-3 border border-orange-300 text-orange-600 font-medium hover:bg-orange-100 hover:text-orange-700 transition-colors duration-200 text-sm tracking-wide uppercase"
             >
               VIEW ALL
             </Link>
@@ -114,7 +114,7 @@ const TrendingProducts = () => {
           </div>
           <Link 
             to="/shop"
-            className="px-8 py-3 border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors duration-200 text-sm tracking-wide uppercase"
+            className="px-8 py-3 border border-orange-300 text-orange-600 font-medium hover:bg-orange-100 hover:text-orange-700 transition-colors duration-200 text-sm tracking-wide uppercase"
           >
             VIEW ALL
           </Link>
@@ -178,12 +178,12 @@ const TrendingProducts = () => {
                         <span className="text-gray-400 line-through text-sm">
                           ₵{product.originalPrice.toFixed(2)}
                         </span>
-                        <span className="text-gray-900 font-semibold text-lg">
+                        <span className="text-orange-600 font-semibold text-lg">
                           ₵{product.price.toFixed(2)}
                         </span>
                       </>
                     ) : (
-                      <span className="text-gray-900 font-semibold text-lg">
+                      <span className="text-orange-500 font-semibold text-lg">
                         ₵{product.price.toFixed(2)}
                       </span>
                     )}

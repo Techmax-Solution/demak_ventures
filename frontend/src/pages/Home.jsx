@@ -17,9 +17,9 @@ const Home = () => {
     {
       id: 1,
       tagline: "Made From Cotton",
-      title: "Soft Wine Red",
+      title: "Soft Orange",
       subtitle: "Sweatshirt",
-      bgColor: "from-gray-950 via-gray-900 to-black",
+      bgColor: "from-orange-200 via-orange-300 to-orange-400",
       placeholderIcon: (
         <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -80,9 +80,9 @@ const Home = () => {
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               
               {/* Left Content */}
-              <div key={`content-${currentSlideData.id}`} className={`text-white space-y-8 ${slideDirection === 'right' ? 'slide-enter-right' : 'slide-enter-left'}`}>
+              <div key={`content-${currentSlideData.id}`} className={`text-gray-800 space-y-8 ${slideDirection === 'right' ? 'slide-enter-right' : 'slide-enter-left'}`}>
                 <div className="space-y-2">
-                  <p className="text-sm font-medium tracking-wider text-slate-300 uppercase transition-all duration-500">
+                  <p className="text-sm font-medium tracking-wider text-orange-600 uppercase transition-all duration-500">
                     {currentSlideData.tagline}
                   </p>
                   <h1 className="text-5xl lg:text-7xl font-light leading-tight transition-all duration-500">
@@ -95,7 +95,7 @@ const Home = () => {
                 <div className="">
                   <Link 
                     to="/shop" 
-                    className="group inline-flex items-center space-x-2 text-white border-b border-white pb-1 hover:border-slate-300 transition-colors duration-300"
+                    className="group inline-flex items-center space-x-2 text-orange-600 border-b border-orange-600 pb-1 hover:border-orange-700 transition-colors duration-300"
                   >
                     <span className="text-sm font-medium tracking-wider uppercase">Shop Collection</span>
                     <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">

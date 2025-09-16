@@ -70,7 +70,7 @@ const NewArrivals = () => {
               <p className="text-gray-500 mb-4">{error}</p>
               <button 
                 onClick={() => window.location.reload()} 
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                className="px-4 py-2 bg-orange-100 text-orange-600 rounded hover:bg-orange-200"
               >
                 Try Again
               </button>
@@ -173,7 +173,7 @@ const NewArrivals = () => {
                       
                       {/* Compact Price Display */}
                       <div className="flex items-center justify-between">
-                        <span className="text-lg font-bold text-gray-900">
+                        <span className="text-lg font-bold text-orange-600">
                           ${product.price.toFixed(2)}
                         </span>
                         {product.originalPrice && product.originalPrice > product.price && (
@@ -214,7 +214,7 @@ const NewArrivals = () => {
         <div className="text-center mt-16">
           <Link 
             to="/shop"
-            className="group inline-flex items-center gap-3 bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-12 py-4 rounded-full font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
+            className="group inline-flex items-center gap-3 bg-gradient-to-r from-orange-100 to-orange-200 hover:from-orange-200 hover:to-orange-300 text-orange-600 px-12 py-4 rounded-full font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
           >
             <span className="text-sm tracking-wide uppercase">Explore Full Collection</span>
             <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
