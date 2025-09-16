@@ -127,6 +127,12 @@ export const adminCategoriesAPI = {
         url: error.config?.url,
         method: error.config?.method
       });
+      
+      // Re-throw the error with enhanced information
+      if (error.response?.data?.message) {
+        error.userMessage = error.response.data.message;
+      }
+      
       throw error;
     }
   },

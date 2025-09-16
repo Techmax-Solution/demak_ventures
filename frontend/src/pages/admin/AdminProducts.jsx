@@ -458,92 +458,126 @@ const AdminProducts = () => {
               </div>
             </div>
 
-            {/* Sizes */}
+            {/* Sizes and Stock */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
                 Sizes and Stock
               </label>
-              {formData.sizes.map((size, index) => (
-                <div key={index} className="flex items-center space-x-2 mb-2">
-                  <select
-                    value={size.size}
-                    onChange={(e) => handleSizeChange(index, 'size', e.target.value)}
-                    className="input-field flex-1"
-                  >
-                    {sizeOptions.map(sizeOption => (
-                      <option key={sizeOption} value={sizeOption}>{sizeOption}</option>
-                    ))}
-                  </select>
-                  <input
-                    type="number"
-                    value={size.quantity}
-                    onChange={(e) => handleSizeChange(index, 'quantity', e.target.value)}
-                    min="0"
-                    className="input-field w-24"
-                    placeholder="Qty"
-                  />
-                  {formData.sizes.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeSize(index)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={addSize}
-                className="text-orange-500 hover:text-orange-700 text-sm"
-              >
-                + Add Size
-              </button>
+              <div className="space-y-3">
+                {formData.sizes.map((size, index) => (
+                  <div key={index} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg bg-gray-50">
+                    <div className="flex-1">
+                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                        Size
+                      </label>
+                      <select
+                        value={size.size}
+                        onChange={(e) => handleSizeChange(index, 'size', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      >
+                        <option value="">Select Size</option>
+                        {sizeOptions.map(sizeOption => (
+                          <option key={sizeOption} value={sizeOption}>{sizeOption}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="w-24">
+                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                        Stock
+                      </label>
+                      <input
+                        type="number"
+                        value={size.quantity}
+                        onChange={(e) => handleSizeChange(index, 'quantity', e.target.value)}
+                        min="0"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                        placeholder="0"
+                      />
+                    </div>
+                    {formData.sizes.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeSize(index)}
+                        className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-md transition-colors"
+                        title="Remove this size"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={addSize}
+                  className="flex items-center text-orange-500 hover:text-orange-700 text-sm font-medium transition-colors"
+                >
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add Size
+                </button>
+              </div>
             </div>
 
             {/* Colors */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
                 Colors
               </label>
-              {formData.colors.map((color, index) => (
-                <div key={index} className="flex items-center space-x-2 mb-2">
-                  <input
-                    type="text"
-                    value={color.color}
-                    onChange={(e) => handleColorChange(index, 'color', e.target.value)}
-                    className="input-field flex-1"
-                    placeholder="Color name"
-                  />
-                  <input
-                    type="color"
-                    value={color.hexCode}
-                    onChange={(e) => handleColorChange(index, 'hexCode', e.target.value)}
-                    className="w-12 h-10 border border-gray-300 rounded"
-                  />
-                  {formData.colors.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeColor(index)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={addColor}
-                className="text-orange-500 hover:text-orange-700 text-sm"
-              >
-                + Add Color
-              </button>
+              <div className="space-y-3">
+                {formData.colors.map((color, index) => (
+                  <div key={index} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg bg-gray-50">
+                    <div className="flex-1">
+                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                        Color Name
+                      </label>
+                      <input
+                        type="text"
+                        value={color.color}
+                        onChange={(e) => handleColorChange(index, 'color', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                        placeholder="e.g., Blue, Red, Black"
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                        Color
+                      </label>
+                      <input
+                        type="color"
+                        value={color.hexCode}
+                        onChange={(e) => handleColorChange(index, 'hexCode', e.target.value)}
+                        className="w-12 h-10 border border-gray-300 rounded cursor-pointer"
+                        title="Select color"
+                      />
+                    </div>
+                    {formData.colors.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeColor(index)}
+                        className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-md transition-colors"
+                        title="Remove this color"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={addColor}
+                  className="flex items-center text-orange-500 hover:text-orange-700 text-sm font-medium transition-colors"
+                >
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add Color
+                </button>
+              </div>
             </div>
 
             {/* Images */}

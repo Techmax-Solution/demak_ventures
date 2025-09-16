@@ -197,29 +197,55 @@ export const deleteCategory = async (req, res) => {
             });
         }
 
-        // Check if category has products
+        // Get counts for information purposes
         const productsCount = await Product.countDocuments({ category: category._id });
-        if (productsCount > 0) {
-            return res.status(400).json({
-                success: false,
-                message: `Cannot delete category. It has ${productsCount} associated products.`
-            });
-        }
-
-        // Check if category has subcategories
         const subcategoriesCount = await Category.countDocuments({ parentCategory: category._id });
-        if (subcategoriesCount > 0) {
-            return res.status(400).json({
-                success: false,
-                message: `Cannot delete category. It has ${subcategoriesCount} subcategories.`
-            });
+
+        // Handle associated products - move them to a default category or create one
+        if (productsCount > 0) {
+            let defaultCategory = await Category.findOne({ name: 'General' });
+            
+            // Create a "General" category if it doesn't exist
+            if (!defaultCategory) {
+                defaultCategory = new Category({
+                    name: 'General',
+                    description: 'Default category for products without a specific category',
+                    isActive: true,
+                    sortOrder: 999
+                });
+                await defaultCategory.save();
+            }
+
+            // Move all products to the default category
+            await Product.updateMany(
+                { category: category._id },
+                { category: defaultCategory._id }
+            );
         }
 
+        // Handle subcategories - move them to parent category or make them top-level
+        if (subcategoriesCount > 0) {
+            if (category.parentCategory) {
+                // Move subcategories to the parent category
+                await Category.updateMany(
+                    { parentCategory: category._id },
+                    { parentCategory: category.parentCategory }
+                );
+            } else {
+                // Make subcategories top-level (remove parent reference)
+                await Category.updateMany(
+                    { parentCategory: category._id },
+                    { $unset: { parentCategory: 1 } }
+                );
+            }
+        }
+
+        // Delete the category
         await Category.findByIdAndDelete(req.params.id);
 
         res.json({ 
             success: true,
-            message: 'Category deleted successfully' 
+            message: `Category deleted successfully. ${productsCount} products moved to General category, ${subcategoriesCount} subcategories reorganized.`
         });
     } catch (error) {
         console.error(error);

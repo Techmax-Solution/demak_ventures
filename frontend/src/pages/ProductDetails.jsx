@@ -27,6 +27,17 @@ const ProductDetails = () => {
       const data = await getProductById(id);
       setProduct(data);
       setError(null);
+      
+      // Don't auto-select size - let user choose
+      
+      // Auto-select first available color if colors exist
+      if (data.colors && data.colors.length > 0) {
+        const firstColor = data.colors[0];
+        const colorName = typeof firstColor === 'string' ? firstColor : firstColor.color || firstColor.name;
+        if (colorName) {
+          setSelectedColor(colorName);
+        }
+      }
     } catch (err) {
       setError('Failed to fetch product details. Please try again later.');
       console.error('Error fetching product:', err);
@@ -208,14 +219,7 @@ const ProductDetails = () => {
                 )}
               </div>
 
-              {/* People Viewing */}
-              <div className="flex items-center gap-2 text-sm text-gray-600 mb-6">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                <span>38 People are viewing this right now</span>
-              </div>
+           
 
               {/* Product Description */}
               <div className="text-gray-600 leading-relaxed mb-8">
@@ -226,7 +230,7 @@ const ProductDetails = () => {
             {/* Color Selection */}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-black">Color: <span className="font-normal text-gray-600">{selectedColor || 'Black'}</span></h3>
+                <h3 className="text-lg font-medium text-black">Color: <span className="font-normal text-gray-600">{selectedColor || (product.colors && product.colors.length > 0 ? (typeof product.colors[0] === 'string' ? product.colors[0] : product.colors[0].color || product.colors[0].name) : 'Black')}</span></h3>
             </div>
 
               <div className="flex items-center gap-3">
@@ -309,7 +313,7 @@ const ProductDetails = () => {
             {/* Size Selection */}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-black">Size: <span className="font-normal text-gray-600">{selectedSize || 'L'}</span></h3>
+                <h3 className="text-lg font-medium text-black">Size: <span className="font-normal text-gray-600">{selectedSize || 'Select a size'}</span></h3>
                 <button className="text-sm text-gray-600 underline hover:text-black">Size Guide</button>
               </div>
               
@@ -322,7 +326,7 @@ const ProductDetails = () => {
                         key={size}
                         onClick={() => setSelectedSize(size)}
                         className={`px-4 py-2 border rounded-full min-w-[50px] text-sm font-medium transition-all ${
-                          selectedSize === size || (size === 'L' && !selectedSize)
+                          selectedSize === size
                             ? 'border-black bg-black text-white' 
                             : 'border-gray-300 text-gray-700 hover:border-gray-400'
                         }`}
@@ -332,22 +336,34 @@ const ProductDetails = () => {
                     ))}
                   </>
                 ) : (
-                  product.sizes.map((sizeObj, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedSize(sizeObj.size)}
-                      disabled={sizeObj.quantity === 0}
-                      className={`px-4 py-2 border rounded-full min-w-[50px] text-sm font-medium transition-all ${
-                        selectedSize === sizeObj.size 
-                          ? 'border-black bg-black text-white' 
-                          : sizeObj.quantity === 0
-                          ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
-                          : 'border-gray-300 text-gray-700 hover:border-gray-400'
-                      }`}
-                    >
-                      {sizeObj.size}
-                    </button>
-                  ))
+                  product.sizes.map((sizeObj, index) => {
+                    // Check if size has stock (quantity > 0)
+                    const hasStock = sizeObj.quantity && sizeObj.quantity > 0;
+                    const isSelected = selectedSize === sizeObj.size;
+                    
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedSize(sizeObj.size)}
+                        disabled={!hasStock}
+                        className={`px-4 py-2 border rounded-full min-w-[60px] text-sm font-medium transition-all ${
+                          isSelected
+                            ? 'border-black bg-black text-white' 
+                            : !hasStock
+                            ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+                            : 'border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50'
+                        }`}
+                        title={!hasStock ? 'Out of stock' : `In stock: ${sizeObj.quantity}`}
+                      >
+                        <div className="flex flex-col items-center">
+                          <span>{sizeObj.size}</span>
+                          <span className={`text-xs ${hasStock ? 'opacity-75' : 'opacity-50'}`}>
+                            ({sizeObj.quantity || 0})
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })
                 )}
               </div>
             </div>

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import Table from '../../components/admin/Table';
 import FormModal from '../../components/admin/FormModal';
-import AuthDebugPanel from '../../components/admin/AuthDebugPanel';
+import ConfirmationModal from '../../components/admin/ConfirmationModal';
+import SuccessModal from '../../components/admin/SuccessModal';
 import adminApi from '../../services/adminApi';
 
 const AdminCategories = () => {
@@ -19,6 +20,13 @@ const AdminCategories = () => {
     seoTitle: '',
     seoDescription: ''
   });
+  
+  // Modal states
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     fetchCategories();
@@ -75,18 +83,36 @@ const AdminCategories = () => {
     setModalOpen(true);
   };
 
-  const handleDelete = async (category) => {
-    if (!window.confirm('Are you sure you want to delete this category? This action cannot be undone.')) {
-      return;
-    }
+  const handleDelete = (category) => {
+    setCategoryToDelete(category);
+    setDeleteModalOpen(true);
+  };
 
+  const confirmDelete = async () => {
+    if (!categoryToDelete) return;
+
+    setDeleteLoading(true);
     try {
-      await adminApi.categories.deleteCategory(category._id);
+      const response = await adminApi.categories.deleteCategory(categoryToDelete._id);
       fetchCategories(); // Refresh the categories list
+      
+      // Show success message with details
+      setSuccessMessage(response.message || 'Category deleted successfully!');
+      setSuccessModalOpen(true);
     } catch (error) {
       console.error('Error deleting category:', error);
-      alert('Error deleting category. Please try again.');
+      setSuccessMessage('Error deleting category. Please try again.');
+      setSuccessModalOpen(true);
+    } finally {
+      setDeleteLoading(false);
+      setDeleteModalOpen(false);
+      setCategoryToDelete(null);
     }
+  };
+
+  const handleSuccessClose = () => {
+    setSuccessModalOpen(false);
+    setSuccessMessage('');
   };
 
   const handleSubmit = async (e) => {
@@ -96,16 +122,20 @@ const AdminCategories = () => {
     try {
       if (editingCategory) {
         await adminApi.categories.updateCategory(editingCategory._id, formData);
+        setSuccessMessage('Category updated successfully!');
       } else {
         await adminApi.categories.createCategory(formData);
+        setSuccessMessage('Category created successfully!');
       }
       
       setModalOpen(false);
       resetForm();
       fetchCategories(); // Refresh the categories list
+      setSuccessModalOpen(true);
     } catch (error) {
       console.error('Error saving category:', error);
-      alert('Error saving category. Please try again.');
+      setSuccessMessage('Error saving category. Please try again.');
+      setSuccessModalOpen(true);
     } finally {
       setFormLoading(false);
     }
@@ -178,7 +208,6 @@ const AdminCategories = () => {
     <AdminLayout>
       <div className="space-y-4 sm:space-y-6">
         {/* Debug Panel - Remove this after debugging */}
-        {process.env.NODE_ENV === 'development' && <AuthDebugPanel />}
         
         {/* Header */}
         <div className="flex flex-col space-y-4 sm:flex-row sm:justify-between sm:items-center sm:space-y-0">
@@ -316,6 +345,32 @@ const AdminCategories = () => {
             </div>
           </div>
         </FormModal>
+
+        {/* Delete Confirmation Modal */}
+        <ConfirmationModal
+          isOpen={deleteModalOpen}
+          onClose={() => {
+            setDeleteModalOpen(false);
+            setCategoryToDelete(null);
+          }}
+          onConfirm={confirmDelete}
+          title="Delete Category"
+          message={categoryToDelete ? `Are you sure you want to delete the category "${categoryToDelete.name}"?\n\nThis action cannot be undone. Any associated products will be moved to a "General" category and subcategories will be reorganized.` : ''}
+          confirmText="Delete Category"
+          cancelText="Cancel"
+          type="danger"
+          loading={deleteLoading}
+        />
+
+        {/* Success Modal */}
+        <SuccessModal
+          isOpen={successModalOpen}
+          onClose={handleSuccessClose}
+          title="Operation Complete"
+          message={successMessage}
+          buttonText="OK"
+          type={successMessage.includes('Error') ? 'warning' : 'success'}
+        />
       </div>
     </AdminLayout>
   );
