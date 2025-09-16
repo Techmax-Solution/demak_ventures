@@ -378,10 +378,80 @@ export const adminHeroImagesAPI = {
   }
 };
 
+// Admin Management API
+export const adminManagementAPI = {
+  // Get all admins
+  getAllAdmins: async (params = {}) => {
+    try {
+      const response = await api.get('/admin/admins', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching admins:', error);
+      throw error;
+    }
+  },
+
+  // Create admin
+  createAdmin: async (adminData) => {
+    try {
+      const response = await api.post('/admin/admins', adminData);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating admin:', error);
+      throw error;
+    }
+  },
+
+  // Update admin
+  updateAdmin: async (id, adminData) => {
+    try {
+      const response = await api.put(`/admin/admins/${id}`, adminData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating admin:', error);
+      throw error;
+    }
+  },
+
+  // Delete admin (deactivate)
+  deleteAdmin: async (id) => {
+    try {
+      const response = await api.delete(`/admin/admins/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting admin:', error);
+      throw error;
+    }
+  },
+
+  // Reset admin password
+  resetAdminPassword: async (id, newPassword) => {
+    try {
+      const response = await api.post(`/admin/admins/${id}/reset-password`, { newPassword });
+      return response.data;
+    } catch (error) {
+      console.error('Error resetting admin password:', error);
+      throw error;
+    }
+  },
+
+  // Get admin statistics
+  getAdminStats: async () => {
+    try {
+      const response = await api.get('/admin/admins/stats');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching admin stats:', error);
+      throw error;
+    }
+  }
+};
+
 export default {
   products: adminProductsAPI,
   categories: adminCategoriesAPI,
   users: adminUsersAPI,
   orders: adminOrdersAPI,
-  heroImages: adminHeroImagesAPI
+  heroImages: adminHeroImagesAPI,
+  admins: adminManagementAPI
 };

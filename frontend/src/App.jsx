@@ -25,6 +25,7 @@ import AdminCategories from './pages/admin/AdminCategories';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminHeroImages from './pages/admin/AdminHeroImages';
+import AdminAdmins from './pages/admin/AdminAdmins';
 import ProtectedAdminRoute from './components/admin/ProtectedAdminRoute';
 import SessionDebugger from './components/SessionDebugger';
 
@@ -71,6 +72,11 @@ function App() {
             <Route path="/admin/hero-images" element={
               <ProtectedAdminRoute>
                 <AdminHeroImages />
+              </ProtectedAdminRoute>
+            } />
+            <Route path="/admin/admins" element={
+              <ProtectedAdminRoute>
+                <AdminAdmins />
               </ProtectedAdminRoute>
             } />
 

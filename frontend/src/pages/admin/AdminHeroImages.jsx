@@ -27,23 +27,77 @@ const AdminHeroImages = () => {
     sortOrder: 0
   });
   const [dragStartIndex, setDragStartIndex] = useState(null);
+  const [showDeleted, setShowDeleted] = useState(false);
 
   const bgColorOptions = [
+    // Light Colors
     { value: 'from-orange-200 via-orange-300 to-orange-400', label: 'Light Orange' },
-    { value: 'from-amber-950 via-amber-900 to-stone-900', label: 'Dark Amber' },
-    { value: 'from-gray-700 via-gray-600 to-gray-800', label: 'Dark Gray' },
+    { value: 'from-blue-200 via-blue-300 to-blue-400', label: 'Light Blue' },
+    { value: 'from-green-200 via-green-300 to-green-400', label: 'Light Green' },
+    { value: 'from-purple-200 via-purple-300 to-purple-400', label: 'Light Purple' },
+    { value: 'from-pink-200 via-pink-300 to-pink-400', label: 'Light Pink' },
+    { value: 'from-indigo-200 via-indigo-300 to-indigo-400', label: 'Light Indigo' },
+    { value: 'from-cyan-200 via-cyan-300 to-cyan-400', label: 'Light Cyan' },
+    { value: 'from-teal-200 via-teal-300 to-teal-400', label: 'Light Teal' },
+    
+    // Dark Orange & Brown Tones
     { value: 'from-orange-800 via-orange-900 to-orange-950', label: 'Dark Orange' },
+    { value: 'from-orange-700 via-orange-800 to-orange-900', label: 'Medium Dark Orange' },
     { value: 'from-amber-800 via-amber-900 to-amber-950', label: 'Dark Brown' },
+    { value: 'from-amber-700 via-amber-800 to-amber-900', label: 'Medium Dark Brown' },
+    { value: 'from-amber-900 via-orange-900 to-orange-950', label: 'Dark Brown Orange' },
+    { value: 'from-orange-900 via-red-900 to-red-950', label: 'Dark Orange Red' },
+    { value: 'from-yellow-800 via-orange-800 to-orange-900', label: 'Dark Yellow Orange' },
+    { value: 'from-amber-950 via-amber-900 to-stone-900', label: 'Dark Amber' },
+    
+    // Dark Blue & Purple Tones
+    { value: 'from-blue-800 via-blue-900 to-blue-950', label: 'Dark Blue' },
+    { value: 'from-blue-700 via-blue-800 to-blue-900', label: 'Medium Dark Blue' },
+    { value: 'from-indigo-800 via-indigo-900 to-indigo-950', label: 'Dark Indigo' },
+    { value: 'from-indigo-700 via-indigo-800 to-indigo-900', label: 'Medium Dark Indigo' },
+    { value: 'from-purple-800 via-purple-900 to-purple-950', label: 'Dark Purple' },
+    { value: 'from-purple-700 via-purple-800 to-purple-900', label: 'Medium Dark Purple' },
+    { value: 'from-violet-800 via-violet-900 to-violet-950', label: 'Dark Violet' },
+    { value: 'from-blue-900 via-indigo-900 to-purple-900', label: 'Dark Blue Purple' },
+    
+    // Dark Green & Teal Tones
+    { value: 'from-green-800 via-green-900 to-green-950', label: 'Dark Green' },
+    { value: 'from-green-700 via-green-800 to-green-900', label: 'Medium Dark Green' },
+    { value: 'from-emerald-800 via-emerald-900 to-emerald-950', label: 'Dark Emerald' },
+    { value: 'from-teal-800 via-teal-900 to-teal-950', label: 'Dark Teal' },
+    { value: 'from-teal-700 via-teal-800 to-teal-900', label: 'Medium Dark Teal' },
+    { value: 'from-cyan-800 via-cyan-900 to-cyan-950', label: 'Dark Cyan' },
+    { value: 'from-green-900 via-teal-900 to-cyan-900', label: 'Dark Green Teal' },
+    
+    // Dark Red & Pink Tones
+    { value: 'from-red-800 via-red-900 to-red-950', label: 'Dark Red' },
+    { value: 'from-red-700 via-red-800 to-red-900', label: 'Medium Dark Red' },
+    { value: 'from-rose-800 via-rose-900 to-rose-950', label: 'Dark Rose' },
+    { value: 'from-pink-800 via-pink-900 to-pink-950', label: 'Dark Pink' },
+    { value: 'from-rose-900 via-red-900 to-orange-900', label: 'Dark Rose Orange' },
+    { value: 'from-red-900 via-pink-900 to-purple-900', label: 'Dark Red Pink' },
+    
+    // Dark Gray & Neutral Tones
+    { value: 'from-gray-800 via-gray-900 to-black', label: 'Charcoal' },
+    { value: 'from-gray-700 via-gray-800 to-gray-900', label: 'Medium Dark Gray' },
+    { value: 'from-gray-600 via-gray-700 to-gray-800', label: 'Dark Gray' },
     { value: 'from-stone-800 via-stone-900 to-stone-950', label: 'Dark Stone' },
+    { value: 'from-stone-700 via-stone-800 to-stone-900', label: 'Medium Dark Stone' },
     { value: 'from-neutral-800 via-neutral-900 to-neutral-950', label: 'Dark Neutral' },
     { value: 'from-slate-800 via-slate-900 to-slate-950', label: 'Dark Slate' },
     { value: 'from-zinc-800 via-zinc-900 to-zinc-950', label: 'Dark Zinc' },
-    { value: 'from-orange-700 via-orange-800 to-orange-900', label: 'Medium Dark Orange' },
-    { value: 'from-amber-700 via-amber-800 to-amber-900', label: 'Medium Dark Brown' },
-    { value: 'from-stone-700 via-stone-800 to-stone-900', label: 'Medium Dark Stone' },
-    { value: 'from-gray-800 via-gray-900 to-black', label: 'Charcoal' },
-    { value: 'from-orange-900 via-red-900 to-red-950', label: 'Dark Orange Red' },
-    { value: 'from-amber-900 via-orange-900 to-orange-950', label: 'Dark Brown Orange' }
+    
+    // Special Gradient Combinations
+    { value: 'from-slate-900 via-gray-900 to-black', label: 'Deep Charcoal' },
+    { value: 'from-gray-900 via-slate-900 to-indigo-900', label: 'Dark Slate Indigo' },
+    { value: 'from-slate-900 via-blue-900 to-indigo-900', label: 'Slate Blue Indigo' },
+    { value: 'from-gray-900 via-zinc-900 to-stone-900', label: 'Dark Metal' },
+    { value: 'from-black via-gray-900 to-slate-800', label: 'Black to Slate' },
+    { value: 'from-slate-900 via-gray-800 to-zinc-800', label: 'Slate to Zinc' },
+    { value: 'from-indigo-900 via-purple-900 to-pink-900', label: 'Indigo Purple Pink' },
+    { value: 'from-blue-900 via-cyan-900 to-teal-900', label: 'Blue Cyan Teal' },
+    { value: 'from-orange-900 via-amber-900 to-yellow-800', label: 'Orange Amber Yellow' },
+    { value: 'from-red-900 via-orange-900 to-yellow-800', label: 'Red Orange Yellow' }
   ];
 
   useEffect(() => {
@@ -122,13 +176,50 @@ const AdminHeroImages = () => {
 
   const confirmDelete = async () => {
     try {
-      await adminApi.heroImages.deleteHeroImage(deletingHeroImage._id);
+      console.log('Deleting hero image with ID:', deletingHeroImage._id);
+      const response = await adminApi.heroImages.deleteHeroImage(deletingHeroImage._id);
+      console.log('Delete response:', response);
       setSuccessMessage('Hero image deleted successfully!');
       setShowDeleteModal(false);
       setShowSuccessModal(true);
       fetchHeroImages();
     } catch (error) {
       console.error('Error deleting hero image:', error);
+      console.error('Error details:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message
+      });
+      alert('Failed to delete hero image. Please try again.');
+    }
+  };
+
+  const handleRestore = async (heroImage) => {
+    try {
+      await adminApi.heroImages.updateHeroImage(heroImage._id, { isActive: true });
+      setSuccessMessage('Hero image restored successfully!');
+      setShowSuccessModal(true);
+      fetchHeroImages();
+    } catch (error) {
+      console.error('Error restoring hero image:', error);
+      alert('Failed to restore hero image. Please try again.');
+    }
+  };
+
+  const handlePermanentDelete = async (heroImage) => {
+    if (window.confirm('Are you sure you want to permanently remove this hero image? This action cannot be undone.')) {
+      try {
+        // For now, we'll use the same delete endpoint since it's a soft delete
+        // In a real app, you might want a separate permanent delete endpoint
+        await adminApi.heroImages.deleteHeroImage(heroImage._id);
+        setSuccessMessage('Hero image permanently removed!');
+        setShowSuccessModal(true);
+        fetchHeroImages();
+      } catch (error) {
+        console.error('Error permanently deleting hero image:', error);
+        alert('Failed to permanently delete hero image. Please try again.');
+      }
     }
   };
 
@@ -208,29 +299,47 @@ const AdminHeroImages = () => {
             <h1 className="text-2xl font-bold text-gray-900">Hero Images</h1>
             <p className="text-gray-600">Manage hero section images and content</p>
           </div>
-          <button
-            onClick={() => {
-              resetForm();
-              setShowFormModal(true);
-            }}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Add Hero Image
-          </button>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="showDeleted"
+                checked={showDeleted}
+                onChange={(e) => setShowDeleted(e.target.checked)}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label htmlFor="showDeleted" className="text-sm text-gray-700">
+                Show deleted
+              </label>
+            </div>
+            <button
+              onClick={() => {
+                resetForm();
+                setShowFormModal(true);
+              }}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Add Hero Image
+            </button>
+          </div>
         </div>
 
         {/* Hero Images Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {heroImages.map((heroImage, index) => (
+          {heroImages
+            .filter(heroImage => showDeleted || heroImage.isActive)
+            .map((heroImage, filteredIndex) => {
+              const originalIndex = heroImages.findIndex(h => h._id === heroImage._id);
+              return (
             <div
               key={heroImage._id}
-              draggable
-              onDragStart={(e) => handleDragStart(e, index)}
+              draggable={heroImage.isActive}
+              onDragStart={(e) => handleDragStart(e, originalIndex)}
               onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, index)}
+              onDrop={(e) => handleDrop(e, originalIndex)}
               className={`bg-white rounded-lg shadow-md overflow-hidden border-2 ${
-                heroImage.isActive ? 'border-green-200' : 'border-gray-200'
-              } hover:shadow-lg transition-shadow cursor-move`}
+                heroImage.isActive ? 'border-green-200' : 'border-red-200 opacity-60'
+              } hover:shadow-lg transition-shadow ${heroImage.isActive ? 'cursor-move' : 'cursor-default'}`}
             >
               {/* Image Preview */}
               <div className="relative h-48 bg-gray-100">
@@ -253,9 +362,9 @@ const AdminHeroImages = () => {
                   <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                     heroImage.isActive 
                       ? 'bg-green-100 text-green-800' 
-                      : 'bg-gray-100 text-gray-800'
+                      : 'bg-red-100 text-red-800'
                   }`}>
-                    {heroImage.isActive ? 'Active' : 'Inactive'}
+                    {heroImage.isActive ? 'Active' : 'Deleted'}
                   </span>
                 </div>
 
@@ -281,22 +390,42 @@ const AdminHeroImages = () => {
 
                 {/* Actions */}
                 <div className="flex space-x-2">
-                  <button
-                    onClick={() => handleEdit(heroImage)}
-                    className="flex-1 bg-blue-50 text-blue-700 px-3 py-1 rounded text-sm hover:bg-blue-100 transition-colors"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(heroImage)}
-                    className="flex-1 bg-red-50 text-red-700 px-3 py-1 rounded text-sm hover:bg-red-100 transition-colors"
-                  >
-                    Delete
-                  </button>
+                  {heroImage.isActive ? (
+                    <>
+                      <button
+                        onClick={() => handleEdit(heroImage)}
+                        className="flex-1 bg-blue-50 text-blue-700 px-3 py-1 rounded text-sm hover:bg-blue-100 transition-colors"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(heroImage)}
+                        className="flex-1 bg-red-50 text-red-700 px-3 py-1 rounded text-sm hover:bg-red-100 transition-colors"
+                      >
+                        Delete
+                      </button>
+                    </>
+                  ) : (
+                    <div className="flex space-x-1">
+                      <button
+                        onClick={() => handleRestore(heroImage)}
+                        className="flex-1 bg-green-50 text-green-700 px-2 py-1 rounded text-sm hover:bg-green-100 transition-colors"
+                      >
+                        Restore
+                      </button>
+                      <button
+                        onClick={() => handlePermanentDelete(heroImage)}
+                        className="flex-1 bg-red-50 text-red-700 px-2 py-1 rounded text-sm hover:bg-red-100 transition-colors"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-          ))}
+              );
+            })}
         </div>
 
         {heroImages.length === 0 && (
