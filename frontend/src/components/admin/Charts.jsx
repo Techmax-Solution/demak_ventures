@@ -82,14 +82,30 @@ export const RevenueTrendChart = ({ data = [] }) => {
 };
 
 // Orders Status Chart
-export const OrdersStatusChart = ({ data = {} }) => {
-  const chartData = [
+export const OrdersStatusChart = ({ data = [] }) => {
+  // If data is an array (from API), use it directly, otherwise use the old format
+  const chartData = Array.isArray(data) && data.length > 0 ? data.map(item => ({
+    name: item.name,
+    value: item.value,
+    color: getStatusColor(item.name)
+  })) : [
     { name: 'Pending', value: data.pending || 5, color: COLORS.warning },
     { name: 'Processing', value: data.processing || 8, color: COLORS.primary },
     { name: 'Shipped', value: data.shipped || 12, color: COLORS.indigo },
     { name: 'Delivered', value: data.delivered || data.completed || 15, color: COLORS.secondary },
     { name: 'Cancelled', value: data.cancelled || 2, color: COLORS.danger }
   ];
+
+  function getStatusColor(status) {
+    switch (status.toLowerCase()) {
+      case 'pending': return COLORS.warning;
+      case 'processing': return COLORS.primary;
+      case 'shipped': return COLORS.indigo;
+      case 'delivered': return COLORS.secondary;
+      case 'cancelled': return COLORS.danger;
+      default: return COLORS.gray;
+    }
+  }
 
   return (
     <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
@@ -135,7 +151,12 @@ export const OrdersStatusChart = ({ data = {} }) => {
 
 // User Growth Chart
 export const UserGrowthChart = ({ data = [] }) => {
-  const sampleData = data.length > 0 ? data : [
+  // If data is an array from API, use it directly, otherwise use sample data
+  const sampleData = data.length > 0 ? data.map(item => ({
+    month: item.month,
+    users: item.totalUsers,
+    active: item.activeUsers
+  })) : [
     { month: 'Jan', users: 100, active: 85 },
     { month: 'Feb', users: 120, active: 102 },
     { month: 'Mar', users: 150, active: 128 },
@@ -185,7 +206,12 @@ export const UserGrowthChart = ({ data = [] }) => {
 
 // Products by Category Chart
 export const ProductsCategoryChart = ({ data = [] }) => {
-  const sampleData = data.length > 0 ? data : [
+  // If data is an array from API, format it for the chart
+  const sampleData = data.length > 0 ? data.map((item, index) => ({
+    category: item.name,
+    count: item.value,
+    color: PIE_COLORS[index % PIE_COLORS.length]
+  })) : [
     { category: 'Men', count: 45, color: COLORS.primary },
     { category: 'Women', count: 52, color: COLORS.secondary },
     { category: 'Kids', count: 28, color: COLORS.warning },

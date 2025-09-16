@@ -576,3 +576,139 @@ export const getDashboardAnalytics = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+// @desc    Get chart data for dashboard
+// @route   GET /api/orders/chart-data
+// @access  Private/Admin
+export const getChartData = async (req, res) => {
+    try {
+        const now = new Date();
+        const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
+        
+        // Revenue trend data (last 6 months)
+        const revenueData = await Order.aggregate([
+            {
+                $match: {
+                    isPaid: true,
+                    status: { $ne: 'cancelled' },
+                    createdAt: { $gte: sixMonthsAgo }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        year: { $year: '$createdAt' },
+                        month: { $month: '$createdAt' }
+                    },
+                    revenue: { $sum: '$totalPrice' },
+                    orders: { $sum: 1 }
+                }
+            },
+            {
+                $sort: { '_id.year': 1, '_id.month': 1 }
+            }
+        ]);
+
+        // Order status distribution
+        const orderStatusData = await Order.aggregate([
+            {
+                $group: {
+                    _id: '$status',
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
+        // User growth data (last 6 months)
+        const User = (await import('../models/User.js')).default;
+        const userGrowthData = await User.aggregate([
+            {
+                $match: {
+                    createdAt: { $gte: sixMonthsAgo }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        year: { $year: '$createdAt' },
+                        month: { $month: '$createdAt' }
+                    },
+                    totalUsers: { $sum: 1 },
+                    activeUsers: {
+                        $sum: { $cond: [{ $eq: ['$isActive', true] }, 1, 0] }
+                    }
+                }
+            },
+            {
+                $sort: { '_id.year': 1, '_id.month': 1 }
+            }
+        ]);
+
+        // Products by category data
+        const Product = (await import('../models/Product.js')).default;
+        const Category = (await import('../models/Category.js')).default;
+        
+        const productCategoryData = await Product.aggregate([
+            {
+                $match: { isActive: true }
+            },
+            {
+                $lookup: {
+                    from: 'categories',
+                    localField: 'category',
+                    foreignField: '_id',
+                    as: 'categoryInfo'
+                }
+            },
+            {
+                $unwind: '$categoryInfo'
+            },
+            {
+                $group: {
+                    _id: '$categoryInfo.name',
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $sort: { count: -1 }
+            }
+        ]);
+
+        // Format revenue data
+        const formattedRevenueData = revenueData.map(item => ({
+            month: new Date(item._id.year, item._id.month - 1).toLocaleDateString('en-US', { month: 'short' }),
+            revenue: item.revenue,
+            orders: item.orders
+        }));
+
+        // Format order status data
+        const formattedOrderStatusData = orderStatusData.map(item => ({
+            name: item._id.charAt(0).toUpperCase() + item._id.slice(1),
+            value: item.count
+        }));
+
+        // Format user growth data
+        const formattedUserGrowthData = userGrowthData.map(item => ({
+            month: new Date(item._id.year, item._id.month - 1).toLocaleDateString('en-US', { month: 'short' }),
+            totalUsers: item.totalUsers,
+            activeUsers: item.activeUsers
+        }));
+
+        // Format product category data
+        const formattedProductCategoryData = productCategoryData.map(item => ({
+            name: item._id,
+            value: item.count
+        }));
+
+        res.json({
+            revenue: formattedRevenueData,
+            orderStatus: formattedOrderStatusData,
+            userGrowth: formattedUserGrowthData,
+            productCategory: formattedProductCategoryData
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};

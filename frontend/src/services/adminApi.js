@@ -284,6 +284,17 @@ export const adminOrdersAPI = {
       console.error('Error fetching order analytics:', error);
       throw error;
     }
+  },
+
+  // Get chart data
+  getChartData: async () => {
+    try {
+      const response = await api.get('/orders/chart-data');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching chart data:', error);
+      throw error;
+    }
   }
 };
 

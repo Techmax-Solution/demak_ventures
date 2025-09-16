@@ -23,6 +23,7 @@ const AdminDashboard = () => {
     revenue: [],
     userGrowth: [],
     productsCategory: [],
+    orderStatus: [],
     salesPerformance: []
   });
   const [analytics, setAnalytics] = useState({
@@ -40,12 +41,13 @@ const AdminDashboard = () => {
       setLoading(true);
       
       // Fetch dashboard statistics and analytics
-      const [userStats, orderStats, userAnalytics, orderAnalytics, productAnalytics] = await Promise.all([
+      const [userStats, orderStats, userAnalytics, orderAnalytics, productAnalytics, chartDataResponse] = await Promise.all([
         adminApi.users.getUserStats().catch(() => ({ totalUsers: 0, activeUsers: 0 })),
         adminApi.orders.getOrderStats().catch(() => ({ totalOrders: 0, pendingOrders: 0, completedOrders: 0, totalRevenue: 0, monthlyRevenue: 0 })),
         adminApi.users.getUserAnalytics().catch(() => ({ changes: {} })),
         adminApi.orders.getOrderAnalytics().catch(() => ({ changes: {} })),
-        adminApi.products.getProductAnalytics().catch(() => ({ changes: {} }))
+        adminApi.products.getProductAnalytics().catch(() => ({ changes: {} })),
+        adminApi.orders.getChartData().catch(() => ({ revenue: [], orderStatus: [], userGrowth: [], productCategory: [] }))
       ]);
 
       // Fetch recent orders
@@ -75,6 +77,14 @@ const AdminDashboard = () => {
         users: userAnalytics,
         products: productAnalytics,
         orders: orderAnalytics
+      });
+
+      setChartData({
+        revenue: chartDataResponse.revenue || [],
+        userGrowth: chartDataResponse.userGrowth || [],
+        productsCategory: chartDataResponse.productCategory || [],
+        orderStatus: chartDataResponse.orderStatus || [],
+        salesPerformance: chartDataResponse.revenue || [] // Use revenue data for sales performance
       });
 
       setRecentOrders(ordersData.orders || []);
@@ -171,7 +181,7 @@ const AdminDashboard = () => {
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           <RevenueTrendChart data={chartData.revenue} />
-          <OrdersStatusChart data={stats.orders} />
+          <OrdersStatusChart data={chartData.orderStatus} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">

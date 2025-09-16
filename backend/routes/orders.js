@@ -9,7 +9,8 @@ import {
     updateOrderStatus,
     cancelOrder,
     getOrderStats,
-    getDashboardAnalytics
+    getDashboardAnalytics,
+    getChartData
 } from '../controllers/orderController.js';
 import { protect, admin } from '../middleware/auth.js';
 
@@ -18,6 +19,7 @@ const router = express.Router();
 // Admin routes (specific routes before parameterized ones)
 router.get('/stats', protect, admin, getOrderStats);
 router.get('/analytics', protect, admin, getDashboardAnalytics);
+router.get('/chart-data', protect, admin, getChartData);
 router.get('/', protect, admin, getOrders);
 
 // Protected routes
