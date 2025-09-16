@@ -298,9 +298,90 @@ export const adminOrdersAPI = {
   }
 };
 
+// Admin Hero Images API
+export const adminHeroImagesAPI = {
+  // Get all hero images for admin
+  getAllHeroImages: async (params = {}) => {
+    try {
+      const response = await api.get('/hero-images/admin/all', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching hero images:', error);
+      throw error;
+    }
+  },
+
+  // Get public hero images
+  getHeroImages: async () => {
+    try {
+      const response = await api.get('/hero-images');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching public hero images:', error);
+      throw error;
+    }
+  },
+
+  // Create hero image
+  createHeroImage: async (heroImageData) => {
+    try {
+      const response = await api.post('/hero-images/admin', heroImageData);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating hero image:', error);
+      throw error;
+    }
+  },
+
+  // Update hero image
+  updateHeroImage: async (id, heroImageData) => {
+    try {
+      const response = await api.put(`/hero-images/admin/${id}`, heroImageData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating hero image:', error);
+      throw error;
+    }
+  },
+
+  // Delete hero image
+  deleteHeroImage: async (id) => {
+    try {
+      const response = await api.delete(`/hero-images/admin/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting hero image:', error);
+      throw error;
+    }
+  },
+
+  // Update sort order
+  updateSortOrder: async (id, sortOrder) => {
+    try {
+      const response = await api.put(`/hero-images/admin/${id}/sort`, { sortOrder });
+      return response.data;
+    } catch (error) {
+      console.error('Error updating sort order:', error);
+      throw error;
+    }
+  },
+
+  // Bulk update sort order
+  bulkUpdateSortOrder: async (heroImages) => {
+    try {
+      const response = await api.put('/hero-images/admin/sort', { heroImages });
+      return response.data;
+    } catch (error) {
+      console.error('Error bulk updating sort order:', error);
+      throw error;
+    }
+  }
+};
+
 export default {
   products: adminProductsAPI,
   categories: adminCategoriesAPI,
   users: adminUsersAPI,
-  orders: adminOrdersAPI
+  orders: adminOrdersAPI,
+  heroImages: adminHeroImagesAPI
 };

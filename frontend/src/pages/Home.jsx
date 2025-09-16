@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import TrendingProducts from '../components/TrendingProducts';
 import SignatureSection from '../components/SignatureSection';
 import NewArrivals from '../components/NewArrivals';
@@ -8,18 +8,25 @@ import CollectionCards from '../components/CollectionCards';
 import Testimonial from '../components/Testimonial';
 import FeaturedBrands from '../components/FeaturedBrands';
 import ShopByCategory from '../components/ShopByCategory';
+import api from '../services/api';
 
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [slideDirection, setSlideDirection] = useState('right');
+  const [heroImages, setHeroImages] = useState([]);
+  const [loading, setLoading] = useState(true);
   
-  const slides = [
+  // Default fallback slides
+  const defaultSlides = [
     {
       id: 1,
       tagline: "Made From Cotton",
       title: "Soft Orange",
       subtitle: "Sweatshirt",
-      bgColor: "from-orange-200 via-orange-300 to-orange-400",
+      bgColor: "from-orange-800 via-orange-900 to-orange-950",
+      imageUrl: "",
+      linkUrl: "/shop",
+      linkText: "Shop Collection",
       placeholderIcon: (
         <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -32,7 +39,10 @@ const Home = () => {
       tagline: "Premium Denim",
       title: "Classic Blue",
       subtitle: "Jeans",
-      bgColor: "from-amber-950 via-amber-900 to-stone-900",
+      bgColor: "from-amber-800 via-amber-900 to-amber-950",
+      imageUrl: "",
+      linkUrl: "/shop",
+      linkText: "Shop Collection",
       placeholderIcon: (
         <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -45,7 +55,10 @@ const Home = () => {
       tagline: "Summer Collection",
       title: "Elegant White",
       subtitle: "Dress",
-      bgColor: "from-gray-700 via-gray-600 to-gray-800",
+      bgColor: "from-stone-800 via-stone-900 to-stone-950",
+      imageUrl: "",
+      linkUrl: "/shop",
+      linkText: "Shop Collection",
       placeholderIcon: (
         <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -54,6 +67,29 @@ const Home = () => {
       placeholderText: "Summer Dress"
     }
   ];
+
+  useEffect(() => {
+    fetchHeroImages();
+  }, []);
+
+  const fetchHeroImages = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/hero-images');
+      if (response.data && response.data.length > 0) {
+        setHeroImages(response.data);
+      } else {
+        setHeroImages(defaultSlides);
+      }
+    } catch (error) {
+      console.error('Error fetching hero images:', error);
+      setHeroImages(defaultSlides);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const slides = heroImages.length > 0 ? heroImages : defaultSlides;
 
   const nextSlide = () => {
     setSlideDirection('right');
@@ -66,6 +102,17 @@ const Home = () => {
   };
 
   const currentSlideData = slides[currentSlide];
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="flex items-center justify-center h-[600px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -94,10 +141,10 @@ const Home = () => {
                 
                 <div className="">
                   <Link 
-                    to="/shop" 
+                    to={currentSlideData.linkUrl || "/shop"} 
                     className="group inline-flex items-center space-x-2 text-orange-600 border-b border-orange-600 pb-1 hover:border-orange-700 transition-colors duration-300"
                   >
-                    <span className="text-sm font-medium tracking-wider uppercase">Shop Collection</span>
+                    <span className="text-sm font-medium tracking-wider uppercase">{currentSlideData.linkText || "Shop Collection"}</span>
                     <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                     </svg>
@@ -110,14 +157,24 @@ const Home = () => {
                 {/* Circular Background */}
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 lg:w-[440px] lg:h-[440px] bg-gradient-to-br from-slate-200 via-slate-100 to-white rounded-full opacity-90 hero-float"></div>
                 
-                {/* Product Image Placeholder */}
-                <div key={`product-${currentSlideData.id}`} className={`relative z-10 w-80 h-80 lg:w-96 lg:h-96 flex items-center justify-center hero-float ${slideDirection === 'right' ? 'slide-enter-right' : 'slide-enter-left'}`}>
-                  <div className="w-64 h-80 bg-gradient-to-b from-gray-100 to-gray-200 rounded-2xl shadow-2xl flex items-center justify-center transition-all duration-500 transform">
-                    <div className="text-center text-gray-500 space-y-2">
-                      {currentSlideData.placeholderIcon}
-                      <p className="text-sm font-medium">{currentSlideData.placeholderText}</p>
+                {/* Product Image */}
+                <div key={`product-${currentSlideData.id || currentSlideData._id}`} className={`relative z-10 w-80 h-80 lg:w-96 lg:h-96 flex items-center justify-center hero-float ${slideDirection === 'right' ? 'slide-enter-right' : 'slide-enter-left'}`}>
+                  {currentSlideData.imageUrl ? (
+                    <div className="w-64 h-80 rounded-2xl shadow-2xl overflow-hidden transition-all duration-500 transform">
+                      <img
+                        src={currentSlideData.imageUrl}
+                        alt={currentSlideData.title}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                  </div>
+                  ) : (
+                    <div className="w-64 h-80 bg-gradient-to-b from-gray-100 to-gray-200 rounded-2xl shadow-2xl flex items-center justify-center transition-all duration-500 transform">
+                      <div className="text-center text-gray-500 space-y-2">
+                        {currentSlideData.placeholderIcon}
+                        <p className="text-sm font-medium">{currentSlideData.placeholderText}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

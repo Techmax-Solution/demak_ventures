@@ -14,6 +14,7 @@ import categoryRoutes from './routes/categories.js';
 import orderRoutes from './routes/orders.js';
 import uploadRoutes from './routes/upload.js';
 import paystackRoutes from './routes/paystack.js';
+import heroImageRoutes from './routes/heroImages.js';
 
 // ES modules dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
@@ -50,7 +51,8 @@ app.get('/', (req, res) => {
             products: '/api/v1/products',
             categories: '/api/v1/categories',
             orders: '/api/v1/orders',
-            paystack: '/api/v1/paystack'
+            paystack: '/api/v1/paystack',
+            heroImages: '/api/v1/hero-images'
         }
     });
 });
@@ -63,6 +65,7 @@ app.use('/api/v1/categories', categoryRoutes);
 app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/admin/upload', uploadRoutes);
 app.use('/api/v1/paystack', paystackRoutes);
+app.use('/api/v1/hero-images', heroImageRoutes);
 
 // Error handling middleware
 app.use(notFound);
