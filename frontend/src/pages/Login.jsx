@@ -162,8 +162,7 @@ const Login = () => {
   };
 
   const handleForgotPassword = () => {
-    // For now, just show an alert - in a real app, this would open a modal or navigate to a forgot password page
-    alert('Forgot password functionality would be implemented here. For demo purposes, please contact support.');
+    navigate('/forgot-password');
   };
 
   return (

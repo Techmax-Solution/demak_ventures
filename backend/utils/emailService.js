@@ -75,9 +75,9 @@ export const sendPasswordResetEmail = async (email, resetToken, userName) => {
     try {
         const transporter = createTransporter();
         
-        // Create password reset URL - point to backend API route
-        const backendUrl = process.env.BACKEND_URL || 'https://demak-ventures.onrender.com';
-        const resetUrl = `${backendUrl}/api/v1/auth/reset-password?token=${resetToken}`;
+        // Create password reset URL - point to frontend reset password page
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
         
         const mailOptions = {
             from: 'Demak Ventures <noreply@demakventures.com>',

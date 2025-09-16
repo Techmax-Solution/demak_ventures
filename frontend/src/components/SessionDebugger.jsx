@@ -44,7 +44,7 @@ const SessionDebugger = () => {
           className="bg-gray-800 text-white px-3 py-1 rounded text-xs hover:bg-gray-700"
           title="Show Session Debug Info"
         >
-          Debug
+          Debugs
         </button>
       </div>
     );
