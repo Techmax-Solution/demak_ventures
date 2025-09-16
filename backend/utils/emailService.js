@@ -3,13 +3,19 @@ import crypto from 'crypto';
 
 // Email configuration
 const createTransporter = () => {
+    // Check if email credentials are properly configured
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+        console.error('Email credentials not configured. Please set EMAIL_USER and EMAIL_PASSWORD environment variables.');
+        return null;
+    }
+
     // For development - using Gmail SMTP
     // For production, you can switch to SendGrid, Mailgun, or AWS SES
     return nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: process.env.EMAIL_USER || 'your-email@gmail.com',
-            pass: process.env.EMAIL_PASSWORD || 'your-app-password'
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASSWORD
         }
     });
 };
@@ -23,6 +29,11 @@ export const generateVerificationToken = () => {
 export const sendVerificationEmail = async (email, verificationToken, userName) => {
     try {
         const transporter = createTransporter();
+        
+        if (!transporter) {
+            console.error('Cannot send email: Email service not configured');
+            return false;
+        }
         
         // Create verification URL - point to backend API route
         const backendUrl = process.env.BACKEND_URL || 'https://demak-ventures.onrender.com';
@@ -74,6 +85,11 @@ export const sendVerificationEmail = async (email, verificationToken, userName) 
 export const sendPasswordResetEmail = async (email, resetToken, userName) => {
     try {
         const transporter = createTransporter();
+        
+        if (!transporter) {
+            console.error('Cannot send email: Email service not configured');
+            return false;
+        }
         
         // Create password reset URL - point to frontend reset password page
         const frontendUrl = process.env.FRONTEND_URL || 'https://demakgh.com';
