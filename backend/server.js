@@ -28,7 +28,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-    origin: ['http://localhost:3000','https://demak-ventures.vercel.app/', 'http://localhost:5173', 'https://demakgh.com', 'http://demakgh.com'],
+    origin: ['http://localhost:3000','https://demak-ventures.vercel.app', 'https://joyful-monstera-9c1133.netlify.app', 'http://localhost:5173', 'https://demakgh.com', 'http://demakgh.com'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
