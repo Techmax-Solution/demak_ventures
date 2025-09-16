@@ -13,31 +13,38 @@ export const useAdmin = () => {
 };
 
 export const AdminProvider = ({ children }) => {
-  const { user, isAuthenticated, login: userLogin, logout: userLogout } = useUser();
+  const { user, isAuthenticated, loading: userLoading, login: userLogin, logout: userLogout } = useUser();
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Check if user is logged in and is admin on mount
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  // Monitor user changes from UserContext
+  // Monitor user changes from UserContext and update admin state accordingly
   useEffect(() => {
     console.log('🔍 AdminContext: User state changed', {
       isAuthenticated,
+      userLoading,
       user: user ? { name: user.name, email: user.email, role: user.role } : null,
       currentIsAdmin: isAdmin
     });
     
-    if (isAuthenticated && user && user.role === 'admin') {
-      console.log('✅ AdminContext: Setting isAdmin to true');
-      setIsAdmin(true);
+    // Only update admin state when UserContext is not loading
+    if (!userLoading) {
+      if (isAuthenticated && user && user.role === 'admin') {
+        console.log('✅ AdminContext: Setting isAdmin to true');
+        setIsAdmin(true);
+      } else {
+        console.log('❌ AdminContext: Setting isAdmin to false', {
+          reason: !isAuthenticated ? 'not authenticated' : 
+                  !user ? 'no user data' : 
+                  user.role !== 'admin' ? 'not admin role' : 'unknown'
+        });
+        setIsAdmin(false);
+      }
+      // Set loading to false when UserContext finishes loading
+      setLoading(false);
     } else {
-      console.log('❌ AdminContext: Setting isAdmin to false');
-      setIsAdmin(false);
+      console.log('⏳ AdminContext: UserContext still loading, waiting...');
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, userLoading]);
 
   const checkAuth = async () => {
     try {
@@ -101,7 +108,7 @@ export const AdminProvider = ({ children }) => {
     user,
     isAuthenticated,
     isAdmin,
-    loading,
+    loading: loading || userLoading, // Show loading if either context is loading
     login,
     logout,
     checkAuth

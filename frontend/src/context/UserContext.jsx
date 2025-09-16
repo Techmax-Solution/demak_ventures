@@ -152,6 +152,16 @@ export const UserProvider = ({ children }) => {
       setLoading(false);
       setInitialized(true);
       
+      // Add a small delay to ensure state is properly set before any other operations
+      setTimeout(() => {
+        console.log('🔍 Post-restore state check:', {
+          user: !!user,
+          isAuthenticated,
+          loading,
+          userName: user?.name || user?.email || 'NO_USER'
+        });
+      }, 50);
+      
       console.log('✅ User state updated - User:', !!sessionData.user, 'Authenticated: true, Loading: false');
       
       // Verify the state was actually set (async state updates)
@@ -165,8 +175,10 @@ export const UserProvider = ({ children }) => {
       }, 100);
 
       // Verify with server in background (don't change state on network errors)
-      // Temporarily disabled to test if this is causing the logout
-      // verifyWithServer();
+      // Only verify if we have a valid token
+      if (sessionData.token) {
+        verifyWithServer();
+      }
       
     } catch (error) {
       console.error('❌ Auth initialization failed:', error);
