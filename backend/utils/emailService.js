@@ -76,7 +76,7 @@ export const sendPasswordResetEmail = async (email, resetToken, userName) => {
         const transporter = createTransporter();
         
         // Create password reset URL - point to frontend reset password page
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        const frontendUrl = process.env.FRONTEND_URL || 'https://demakgh.com';
         const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
         
         const mailOptions = {
