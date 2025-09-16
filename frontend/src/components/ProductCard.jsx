@@ -1,9 +1,23 @@
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { memo, useCallback } from 'react';
+import { useWishlist } from '../context/WishlistContext';
+import { useUser } from '../context/UserContext';
+import { createAuthHandler } from '../utils/authRedirect';
+import AuthRequiredModal from './AuthRequiredModal';
+import { memo, useCallback, useState } from 'react';
 
 const ProductCard = memo(({ product }) => {
   const { addToCart, isInCart } = useCart();
+  const { addToWishlist, isInWishlist } = useWishlist();
+  const { isAuthenticated } = useUser();
+  
+  // Modal state
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [modalAction, setModalAction] = useState('');
+  
+  // Create auth handlers
+  const handleAuthRequiredForCart = createAuthHandler(setShowAuthModal, setModalAction);
+  const handleAuthRequiredForWishlist = createAuthHandler(setShowAuthModal, setModalAction);
 
   const handleAddToCart = useCallback((e) => {
     e.preventDefault(); // Prevent navigation when clicking the button
@@ -14,20 +28,44 @@ const ProductCard = memo(({ product }) => {
       return;
     }
     
-    // Add to cart with default options
-    addToCart(product, 1);
+    // Add to cart with authentication check
+    const success = addToCart(product, 1, {}, () => handleAuthRequiredForCart('add items to your cart'));
     
-    // Show success feedback
-    const button = e.target;
-    const originalText = button.textContent;
-    button.textContent = 'Added!';
-    button.classList.add('bg-green-600');
+    if (success) {
+      // Show success feedback
+      const button = e.target;
+      const originalText = button.textContent;
+      button.textContent = 'Added!';
+      button.classList.add('bg-green-600');
+      
+      setTimeout(() => {
+        button.textContent = originalText;
+        button.classList.remove('bg-green-600');
+      }, 1000);
+    }
+  }, [product, addToCart, handleAuthRequiredForCart]);
+
+  const handleAddToWishlist = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
     
-    setTimeout(() => {
-      button.textContent = originalText;
-      button.classList.remove('bg-green-600');
-    }, 1000);
-  }, [product, addToCart]);
+    const success = addToWishlist(product, () => handleAuthRequiredForWishlist('add items to your wishlist'));
+    
+    if (success) {
+      // Show success feedback
+      const button = e.target.closest('button');
+      if (button) {
+        const originalText = button.textContent;
+        button.textContent = 'Added!';
+        button.classList.add('text-red-500');
+        
+        setTimeout(() => {
+          button.textContent = originalText;
+          button.classList.remove('text-red-500');
+        }, 1000);
+      }
+    }
+  }, [product, addToWishlist, handleAuthRequiredForWishlist]);
 
   return (
     <div className="card group hover:shadow-lg transition-shadow duration-300">
@@ -52,8 +90,23 @@ const ProductCard = memo(({ product }) => {
               </span>
             </div>
           )}
+          {/* Wishlist Button */}
+          <button
+            onClick={handleAddToWishlist}
+            className="absolute top-2 right-2 p-2 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full shadow-lg transition-all opacity-0 group-hover:opacity-100 z-10"
+            title={isInWishlist(product._id) ? 'Remove from wishlist' : 'Add to wishlist'}
+          >
+            <svg 
+              className={`w-4 h-4 ${isInWishlist(product._id) ? 'text-red-500 fill-current' : 'text-gray-600'}`} 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </button>
           {product.onSale && product.originalPrice && product.originalPrice > product.price && (
-            <div className="absolute top-2 right-2">
+            <div className="absolute top-2 right-12">
               <span className="bg-red-600 text-white px-2 py-1 rounded-full text-xs font-medium">
                 Sale
               </span>
@@ -152,6 +205,13 @@ const ProductCard = memo(({ product }) => {
           </div>
         )}
       </div>
+      
+      {/* Auth Required Modal */}
+      <AuthRequiredModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        action={modalAction}
+      />
     </div>
   );
 });

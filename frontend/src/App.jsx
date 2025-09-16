@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
+import { WishlistProvider } from './context/WishlistContext';
 import { AdminProvider } from './context/AdminContext';
 import { UserProvider } from './context/UserContext';
 import ScrollToTop from './components/ScrollToTop';
@@ -11,6 +12,7 @@ import Shop from './pages/Shop';
 import ProductDetails from './pages/ProductDetails';
 import Dashboard from './pages/Dashboard';
 import Cart from './pages/Cart';
+import Wishlist from './pages/Wishlist';
 import Checkout from './pages/Checkout';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -37,7 +39,8 @@ function App() {
   return (
     <UserProvider>
       <CartProvider>
-        <AdminProvider>
+        <WishlistProvider>
+          <AdminProvider>
           <Router>
             <ScrollToTop />
             <Routes>
@@ -91,6 +94,7 @@ function App() {
                     <Route path="/product/:id" element={<ProductDetails />} />
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/cart" element={<Cart />} />
+                    <Route path="/wishlist" element={<Wishlist />} />
                     <Route path="/checkout" element={<Checkout />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
@@ -103,7 +107,8 @@ function App() {
             } />
           </Routes>
         </Router>
-        </AdminProvider>
+          </AdminProvider>
+        </WishlistProvider>
       </CartProvider>
     </UserProvider>
   );

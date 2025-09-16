@@ -13,6 +13,9 @@ export class SessionManager {
     CART: 'cart',
     CART_BACKUP: 'cart_backup',
     CART_TIMESTAMP: 'cart_timestamp',
+    WISHLIST: 'wishlist',
+    WISHLIST_BACKUP: 'wishlist_backup',
+    WISHLIST_TIMESTAMP: 'wishlist_timestamp',
     USER_PREFERENCES: 'user_preferences',
     SEARCH_HISTORY: 'search_history',
     VIEWED_PRODUCTS: 'viewed_products',
@@ -206,6 +209,24 @@ export class SessionManager {
   // Clear cart data
   static clearCart() {
     this.clearData(this.KEYS.CART);
+  }
+
+  // Save wishlist data
+  static saveWishlist(wishlistData) {
+    return this.saveData(this.KEYS.WISHLIST, wishlistData);
+  }
+
+  // Load wishlist data
+  static loadWishlist() {
+    return this.loadData(this.KEYS.WISHLIST, {
+      items: [],
+      totalItems: 0
+    });
+  }
+
+  // Clear wishlist data
+  static clearWishlist() {
+    this.clearData(this.KEYS.WISHLIST);
   }
 
   // Save user preferences (theme, language, etc.)

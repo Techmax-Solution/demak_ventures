@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import { useUser } from '../context/UserContext';
 import ProfileSidebar from './ProfileSidebar';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [wishlistCount] = useState(0); // Add wishlist state
   const location = useLocation();
   const { getCartItemsCount } = useCart();
+  const { getWishlistItemsCount } = useWishlist();
   const { isAuthenticated, user, logout } = useUser();
 
   const isActive = (path) => location.pathname === path;
@@ -62,7 +63,7 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Actions */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-6">
             {/* Search */}
             <button className="p-2 text-gray-700 hover:text-orange-600 transition-colors duration-200">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -88,7 +89,7 @@ const Navbar = () => {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-4">
                 <Link
                   to="/login"
                   className="text-gray-700 hover:text-orange-600 transition-colors duration-200 text-sm font-medium px-3 py-2"
@@ -109,9 +110,9 @@ const Navbar = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
-              {wishlistCount > 0 && (
+              {getWishlistItemsCount() > 0 && (
                 <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {wishlistCount}
+                  {getWishlistItemsCount()}
                 </span>
               )}
             </Link>
@@ -245,9 +246,9 @@ const Navbar = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>
                     <span className="text-base font-medium">Wishlist</span>
-                    {wishlistCount > 0 && (
+                    {getWishlistItemsCount() > 0 && (
                       <span className="ml-auto bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                        {wishlistCount}
+                        {getWishlistItemsCount()}
                       </span>
                     )}
                   </Link>

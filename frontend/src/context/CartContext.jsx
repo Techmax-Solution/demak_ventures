@@ -1,4 +1,5 @@
 import { createContext, useContext, useReducer, useEffect } from 'react';
+import { useUser } from './UserContext';
 import SessionManager from '../utils/sessionManager.js';
 
 const CartContext = createContext();
@@ -127,32 +128,56 @@ const initialState = {
 // Cart provider component
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState);
+  const { isAuthenticated, user } = useUser();
 
-  // Load cart from localStorage on mount
+  // Load cart from localStorage on mount (only for authenticated users)
   useEffect(() => {
-    console.log('Loading cart from localStorage using SessionManager...');
-    const savedCart = SessionManager.loadCart();
-    if (savedCart && (savedCart.items?.length > 0 || savedCart.totalItems > 0)) {
-      console.log('Cart loaded successfully:', savedCart);
-      dispatch({ type: CART_ACTIONS.LOAD_CART, payload: savedCart });
+    if (isAuthenticated && user) {
+      console.log('Loading cart from localStorage using SessionManager...');
+      const savedCart = SessionManager.loadCart();
+      if (savedCart && (savedCart.items?.length > 0 || savedCart.totalItems > 0)) {
+        console.log('Cart loaded successfully:', savedCart);
+        dispatch({ type: CART_ACTIONS.LOAD_CART, payload: savedCart });
+      }
+    } else {
+      // Clear cart if user is not authenticated
+      dispatch({ type: CART_ACTIONS.CLEAR_CART });
     }
-  }, []);
+  }, [isAuthenticated, user]);
 
-  // Save cart to localStorage whenever state changes (using SessionManager)
+  // Save cart to localStorage whenever state changes (only for authenticated users)
   useEffect(() => {
-    // Only save if cart has been initialized (avoid saving empty initial state)
-    if (state.items.length > 0 || state.totalItems > 0) {
+    if (isAuthenticated && user && (state.items.length > 0 || state.totalItems > 0)) {
       SessionManager.saveCart(state);
       console.log('Cart saved to localStorage:', state);
     }
-  }, [state]);
+  }, [state, isAuthenticated, user]);
 
-  // Cart actions
-  const addToCart = (product, quantity = 1, options = {}) => {
+  // Clear cart when user logs out
+  useEffect(() => {
+    if (!isAuthenticated) {
+      dispatch({ type: CART_ACTIONS.CLEAR_CART });
+      SessionManager.clearCart();
+    }
+  }, [isAuthenticated]);
+
+  // Cart actions with authentication checks
+  const addToCart = (product, quantity = 1, options = {}, onAuthRequired) => {
+    if (!isAuthenticated) {
+      if (onAuthRequired) {
+        onAuthRequired();
+      } else {
+        // Default behavior: redirect to login
+        window.location.href = '/login';
+      }
+      return false;
+    }
+
     dispatch({
       type: CART_ACTIONS.ADD_TO_CART,
       payload: { product, quantity, ...options }
     });
+    return true;
   };
 
   const removeFromCart = (itemKey) => {

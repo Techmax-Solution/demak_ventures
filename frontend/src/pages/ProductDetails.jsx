@@ -2,11 +2,17 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProductById } from '../services/api';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
+import { useUser } from '../context/UserContext';
+import { createAuthHandler } from '../utils/authRedirect';
+import AuthRequiredModal from '../components/AuthRequiredModal';
 
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart, getItemQuantity } = useCart();
+  const { addToWishlist, isInWishlist } = useWishlist();
+  const { isAuthenticated } = useUser();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,7 +21,14 @@ const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  
+  // Modal state
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [modalAction, setModalAction] = useState('');
+  
+  // Create auth handlers
+  const handleAuthRequiredForCart = createAuthHandler(setShowAuthModal, setModalAction);
+  const handleAuthRequiredForWishlist = createAuthHandler(setShowAuthModal, setModalAction);
 
   useEffect(() => {
     fetchProduct();
@@ -59,21 +72,32 @@ const ProductDetails = () => {
     setAddingToCart(true);
     
     try {
-      addToCart(product, quantity, {
+      const success = addToCart(product, quantity, {
         size: selectedSize,
         color: selectedColor
-      });
+      }, () => handleAuthRequiredForCart('add items to your cart'));
       
-      // Show success message
-      alert(`${quantity} item(s) added to cart!`);
-      
-      // Optional: redirect to cart or show success state
-      // navigate('/cart');
+      if (success) {
+        // Show success message
+        alert(`${quantity} item(s) added to cart!`);
+        
+        // Optional: redirect to cart or show success state
+        // navigate('/cart');
+      }
     } catch (error) {
       console.error('Error adding to cart:', error);
       alert('Failed to add item to cart. Please try again.');
     } finally {
       setAddingToCart(false);
+    }
+  };
+
+  const handleAddToWishlist = () => {
+    const success = addToWishlist(product, () => handleAuthRequiredForWishlist('add items to your wishlist'));
+    
+    if (success) {
+      // Show success feedback
+      alert('Item added to wishlist!');
     }
   };
 
@@ -432,13 +456,13 @@ const ProductDetails = () => {
             {/* Action Buttons */}
             <div className="flex items-center justify-center gap-8 py-6 border-t border-gray-200">
               <button 
-                onClick={() => setIsWishlisted(!isWishlisted)}
+                onClick={handleAddToWishlist}
                 className="flex items-center gap-2 text-gray-600 hover:text-black transition-colors"
               >
-                <svg className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={`w-5 h-5 ${isInWishlist(product._id) ? 'fill-current text-red-500' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
-                <span>Add to wishlist</span>
+                <span>{isInWishlist(product._id) ? 'Remove from wishlist' : 'Add to wishlist'}</span>
               </button>
               
               <button className="flex items-center gap-2 text-gray-600 hover:text-black transition-colors">
@@ -458,6 +482,13 @@ const ProductDetails = () => {
           </div>
         </div>
       </div>
+      
+      {/* Auth Required Modal */}
+      <AuthRequiredModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        action={modalAction}
+      />
     </div>
   );
 };
